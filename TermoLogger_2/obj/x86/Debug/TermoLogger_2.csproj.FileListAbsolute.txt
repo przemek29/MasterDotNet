@@ -1,0 +1,21 @@
+C:\Users\Michał\documents\visual studio 2010\Projects\TermoLogger_2\TermoLogger_2\bin\Debug\TermoLogger_2.exe
+C:\Users\Michał\documents\visual studio 2010\Projects\TermoLogger_2\TermoLogger_2\bin\Debug\TermoLogger_2.pdb
+C:\Users\Michał\documents\visual studio 2010\Projects\TermoLogger_2\TermoLogger_2\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Michał\documents\visual studio 2010\Projects\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.Form1.resources
+C:\Users\Michał\documents\visual studio 2010\Projects\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.Properties.Resources.resources
+C:\Users\Michał\documents\visual studio 2010\Projects\TermoLogger_2\TermoLogger_2\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\Michał\documents\visual studio 2010\Projects\TermoLogger_2\TermoLogger_2\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\Michał\documents\visual studio 2010\Projects\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.exe
+C:\Users\Michał\documents\visual studio 2010\Projects\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.pdb
+C:\Users\Michał\Documents\Visual Studio 2010\Projects\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.Form2.resources
+C:\Users\Michał\Documents\Visual Studio 2010\Projects\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.Form3.resources
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.exe
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.pdb
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\bin\Debug\TermoLogger_2.exe
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\bin\Debug\TermoLogger_2.pdb
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.csprojResolveAssemblyReference.cache
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.Form1.resources
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.Form2.resources
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.Form3.resources
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.Properties.Resources.resources
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.csproj.GenerateResource.Cache
