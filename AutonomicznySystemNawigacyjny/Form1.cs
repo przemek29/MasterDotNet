@@ -37,12 +37,17 @@ namespace AutonomicznySystemNawigacyjny
         public double[] akcel2Kalibracja = new double[3];
 
         public double[] magnet = new double[3];
-        public double[] magnetKalibracja = new double[3];
+        public double[] magnetKalibracja = new double[3] { 0, 0, 0 };
+
+        public double[] GainGyro1 = new double[3] { 1.0, 1.0, 1.0 };
+        public double[] GainGyro2 = new double[3] { 1.0, 1.0, 1.0 };
 
         public int licznikWykresu = 0;
         public int licznikRaspberry = 0;
 
-        private readonly KalibracjaMagnetometru _kalibracjaMagnetometru = new KalibracjaMagnetometru(3000, 3000, 3000); 
+        private readonly KalibracjaMagnetometru _kalibracjaMagnetometru = new KalibracjaMagnetometru(3000, 3000, 3000);
+        private readonly KalibracjaBiasGyro _kalibracjaBiasGyro1 = new KalibracjaBiasGyro();
+        private readonly KalibracjaBiasGyro _kalibracjaBiasGyro2 = new KalibracjaBiasGyro();
 
         MahonyAHRS MahonyFilter= new MahonyAHRS(0.002f); // ZMIENIC ARGUMENT
         MadgwickAHRS MadgwickFilter = new MadgwickAHRS(0.002f);
@@ -94,6 +99,11 @@ namespace AutonomicznySystemNawigacyjny
 
         }
 
+        private void odbieranieDanych()
+        {
+
+        }
+
         private void serialPort1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
 
@@ -111,15 +121,19 @@ namespace AutonomicznySystemNawigacyjny
                 rx_str = serialPort1.ReadTo("\r\n"); // przekazanie odebranego łańcucha do zmiennej rx_str
                 this.Invoke(new EventHandler(rx_parse)); // instalacja zdarzenia parsującego odebrany łańcuch
             }
+          
+ 
 
 
 
         }
 
+
+
         // utworzenie zdarzenia  parsującego łańcuch odbierany przez rs232
 
         private void rx_parse(object sender, EventArgs e)
-        {
+        { 
 
 
             string[] dane = new string[16];
@@ -143,13 +157,32 @@ namespace AutonomicznySystemNawigacyjny
 
 
             //}
-            magnetKalibracja[0] = magnet[0] * _kalibracjaMagnetometru.GainX + _kalibracjaMagnetometru.OffsetX;
-            magnetKalibracja[1] = magnet[1] * _kalibracjaMagnetometru.GainY + _kalibracjaMagnetometru.OffsetY;
-            magnetKalibracja[2] = magnet[2] * _kalibracjaMagnetometru.GainZ + _kalibracjaMagnetometru.OffsetZ;
+            gyro1Kalibracja[0] = Math.Round(gyro1[0] * GainGyro1[0]  - _kalibracjaBiasGyro1.SredniaX,4);
+            gyro1Kalibracja[1] = Math.Round(gyro1[1] * GainGyro1[1] - _kalibracjaBiasGyro1.SredniaY,4);
+            gyro1Kalibracja[2] = Math.Round(gyro1[2] * GainGyro1[2] - _kalibracjaBiasGyro1.SredniaZ,4);
+
+            tGyro1XKalib.Text = Convert.ToString(gyro1Kalibracja[0]);
+            tGyro1YKalib.Text = Convert.ToString(gyro1Kalibracja[1]);
+            tGyro1ZKalib.Text = Convert.ToString(gyro1Kalibracja[2]);
+
+            gyro2Kalibracja[0] = Math.Round(gyro2[0] * GainGyro2[0] - _kalibracjaBiasGyro2.SredniaX,4);
+            gyro2Kalibracja[1] = Math.Round(gyro2[1] * GainGyro2[1] - _kalibracjaBiasGyro2.SredniaY,4);
+            gyro2Kalibracja[2] = Math.Round(gyro2[2] * GainGyro2[2] - _kalibracjaBiasGyro2.SredniaZ,4);
+
+            tGyro2XKalib.Text = Convert.ToString(gyro2Kalibracja[0]);
+            tGyro2YKalib.Text = Convert.ToString(gyro2Kalibracja[1]);
+            tGyro2ZKalib.Text = Convert.ToString(gyro2Kalibracja[2]);
+
+            magnetKalibracja[0] = Math.Round(magnet[0] * _kalibracjaMagnetometru.GainX + _kalibracjaMagnetometru.OffsetX, 0);
+            magnetKalibracja[1] = Math.Round(magnet[1] * _kalibracjaMagnetometru.GainY + _kalibracjaMagnetometru.OffsetY, 0);
+            magnetKalibracja[2] = Math.Round(magnet[2] * _kalibracjaMagnetometru.GainZ + _kalibracjaMagnetometru.OffsetZ, 0);
 
             tMagnet1XKalib.Text = Convert.ToString(magnetKalibracja[0]);
             tMagnet1YKalib.Text = Convert.ToString(magnetKalibracja[1]);
             tMagnet1ZKalib.Text = Convert.ToString(magnetKalibracja[2]);
+
+
+
 
 
             if (tabControl2.SelectedTab == PageKF)
@@ -631,38 +664,62 @@ namespace AutonomicznySystemNawigacyjny
             {
                 _kalibracjaMagnetometru.AddValues(magnet[0], magnet[1], magnet[2]);
 
-                tMinMagnetX.Text = Convert.ToString(_kalibracjaMagnetometru.MinX);
-                tMinMagnetY.Text = Convert.ToString(_kalibracjaMagnetometru.MinY);
-                tMinMagnetZ.Text = Convert.ToString(_kalibracjaMagnetometru.MinZ);
-
-                tMaxMagnetX.Text = Convert.ToString(_kalibracjaMagnetometru.MaxX);
-                tMaxMagnetY.Text = Convert.ToString(_kalibracjaMagnetometru.MaxY);
-                tMaxMagnetZ.Text = Convert.ToString(_kalibracjaMagnetometru.MaxZ);
-
-                tOffsetMagnetX.Text = Convert.ToString(_kalibracjaMagnetometru.OffsetX);
-                tOffsetMagnetY.Text = Convert.ToString(_kalibracjaMagnetometru.OffsetY);
-                tOffsetMagnetZ.Text = Convert.ToString(_kalibracjaMagnetometru.OffsetZ);
-
-                tGainMagnetX.Text = Convert.ToString(_kalibracjaMagnetometru.GainX);
-                tGainMagnetY.Text = Convert.ToString(_kalibracjaMagnetometru.GainY);
-                tGainMagnetZ.Text = Convert.ToString(_kalibracjaMagnetometru.GainZ);
-
-                t3DMagnet.Text = Convert.ToString(_kalibracjaMagnetometru.Wektor3D);
-
+                
                 progressBar3.Value = i;
-
-                i++;
             }
+
+            tMinMagnetX.Text = Convert.ToString(_kalibracjaMagnetometru.MinX);
+            tMinMagnetY.Text = Convert.ToString(_kalibracjaMagnetometru.MinY);
+            tMinMagnetZ.Text = Convert.ToString(_kalibracjaMagnetometru.MinZ);
+
+            tMaxMagnetX.Text = Convert.ToString(_kalibracjaMagnetometru.MaxX);
+            tMaxMagnetY.Text = Convert.ToString(_kalibracjaMagnetometru.MaxY);
+            tMaxMagnetZ.Text = Convert.ToString(_kalibracjaMagnetometru.MaxZ);
+
+            tOffsetMagnetX.Text = Convert.ToString(_kalibracjaMagnetometru.OffsetX);
+            tOffsetMagnetY.Text = Convert.ToString(_kalibracjaMagnetometru.OffsetY);
+            tOffsetMagnetZ.Text = Convert.ToString(_kalibracjaMagnetometru.OffsetZ);
+
+            tGainMagnetX.Text = Convert.ToString(_kalibracjaMagnetometru.GainX);
+            tGainMagnetY.Text = Convert.ToString(_kalibracjaMagnetometru.GainY);
+            tGainMagnetZ.Text = Convert.ToString(_kalibracjaMagnetometru.GainZ);
+
+            t3DMagnet.Text = Convert.ToString(_kalibracjaMagnetometru.Wektor3D);
 
 
             //****************
 
 
-           ;
+            ;
 
 
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+            _kalibracjaBiasGyro1.zeruj();
+            _kalibracjaBiasGyro2.zeruj();
 
+            for (int i = 1; i < 1500; i++)
+            {
+                _kalibracjaBiasGyro1.kalibruj(gyro1[0], gyro1[1], gyro1[2], i );
+                _kalibracjaBiasGyro2.kalibruj(gyro2[0], gyro2[1], gyro2[2], i);
+
+                
+                progressBar1.Value = i;
+            }
+
+            tBiasGyro1X.Text = Convert.ToString(_kalibracjaBiasGyro1.SredniaX);
+            tBiasGyro1Y.Text = Convert.ToString(_kalibracjaBiasGyro1.SredniaY);
+            tBiasGyro1Z.Text = Convert.ToString(_kalibracjaBiasGyro1.SredniaZ);
+
+            tBiasGyro2X.Text = Convert.ToString(_kalibracjaBiasGyro2.SredniaX);
+            tBiasGyro2Y.Text = Convert.ToString(_kalibracjaBiasGyro2.SredniaY);
+            tBiasGyro2Z.Text = Convert.ToString(_kalibracjaBiasGyro2.SredniaZ);
+
+            
+        }
+
+       
     }
 }

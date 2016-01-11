@@ -63,6 +63,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="KalibracjaBiasGyro.cs" />
     <Compile Include="KalibracjaMagnetometru.cs" />
     <Compile Include="KalmanFilter.cs" />
     <Compile Include="Madgwick.cs" />

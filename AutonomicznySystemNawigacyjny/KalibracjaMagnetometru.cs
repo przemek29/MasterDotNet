@@ -38,6 +38,7 @@ namespace Autonomiczny_System_Nawigacyjny
             {
                 return Math.Round(Wektor3D / (MaxX - MinX), 2);
             }
+            set { ; }
         }
 
         public double GainY
@@ -46,6 +47,7 @@ namespace Autonomiczny_System_Nawigacyjny
             {
                 return Math.Round(Wektor3D / (MaxY - MinY), 2);
             }
+            set {; }
         }
 
         public double GainZ
@@ -54,6 +56,7 @@ namespace Autonomiczny_System_Nawigacyjny
             {
                 return Math.Round(Wektor3D / (MaxZ - MinZ), 2);
             }
+            set {; }
         }
 
         public double OffsetX
@@ -62,6 +65,7 @@ namespace Autonomiczny_System_Nawigacyjny
             {
                 return Math.Round(((0 - MaxX) + (0 - MinX)) / 2, 2);
             }
+            set {; }
         }
 
         public double OffsetY
@@ -70,6 +74,7 @@ namespace Autonomiczny_System_Nawigacyjny
             {
                 return Math.Round(((0 - MaxY) + (0 - MinY)) / 2, 2);
             }
+            set {; }
         }
 
         public double OffsetZ
@@ -78,6 +83,7 @@ namespace Autonomiczny_System_Nawigacyjny
             {
                 return Math.Round(((0 - MaxZ) + (0 - MinZ)) / 2, 2);
             }
+            set {; }
         }
 
         public KalibracjaMagnetometru(double vendorMaxX, double vendorMaxY, double vendorMaxZ)
@@ -85,6 +91,12 @@ namespace Autonomiczny_System_Nawigacyjny
             _vendorMaxX = vendorMaxX;
             _vendorMaxY = vendorMaxY;
             _vendorMaxZ = vendorMaxZ;
+            GainX = 0;
+            GainY = 0;
+            GainZ = 0;
+            OffsetX = 0;
+            OffsetY = 0;
+            OffsetZ = 0;
         }
 
         public void AddValues(double x, double y, double z)
