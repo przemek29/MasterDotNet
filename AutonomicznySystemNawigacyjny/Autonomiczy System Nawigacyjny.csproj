@@ -68,6 +68,8 @@
     <Compile Include="KalmanFilter.cs" />
     <Compile Include="Madgwick.cs" />
     <Compile Include="MahonyFilter.cs" />
+    <Compile Include="MetodaSimpsona.cs" />
+    <Compile Include="MetodaTrapezow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UzyskajKatyZAkcelerometru.cs" />
