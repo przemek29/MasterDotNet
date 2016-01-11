@@ -1,0 +1,30 @@
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\Autonomiczy System Nawigacyjny.csprojResolveAssemblyReference.cache
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\TermoLogger_2.Form1.resources
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\Autonomiczy System Nawigacyjny.csproj.GenerateResource.Cache
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\bin\Debug\ZedGraph.dll
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\bin\Debug\Autonomiczny System Nawigacyjny.exe.config
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\bin\Debug\Autonomiczny System Nawigacyjny.exe
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\bin\Debug\Autonomiczny System Nawigacyjny.pdb
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\Autonomiczny_System_Nawigacyjny.Properties.Resources.resources
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\Autonomiczny System Nawigacyjny.exe
+C:\Users\DOMINIKA\Desktop\TermoLogger_2\TermoLogger_2\obj\x86\Debug\Autonomiczny System Nawigacyjny.pdb
+C:\Users\DOMINIKA\Desktop\ASN\TermoLogger_2\bin\Debug\Autonomiczny System Nawigacyjny.exe.config
+C:\Users\DOMINIKA\Desktop\ASN\TermoLogger_2\obj\x86\Debug\Autonomiczny System Nawigacyjny.exe
+C:\Users\DOMINIKA\Desktop\ASN\TermoLogger_2\obj\x86\Debug\Autonomiczny System Nawigacyjny.pdb
+C:\Users\DOMINIKA\Desktop\ASN\TermoLogger_2\bin\Debug\Autonomiczny System Nawigacyjny.exe
+C:\Users\DOMINIKA\Desktop\ASN\TermoLogger_2\bin\Debug\Autonomiczny System Nawigacyjny.pdb
+C:\Users\DOMINIKA\Desktop\ASN\TermoLogger_2\bin\Debug\ZedGraph.dll
+C:\Users\DOMINIKA\Desktop\ASN\TermoLogger_2\obj\x86\Debug\Autonomiczy System Nawigacyjny.csprojResolveAssemblyReference.cache
+C:\Users\DOMINIKA\Desktop\ASN\TermoLogger_2\obj\x86\Debug\TermoLogger_2.Form1.resources
+C:\Users\DOMINIKA\Desktop\ASN\TermoLogger_2\obj\x86\Debug\Autonomiczny_System_Nawigacyjny.Properties.Resources.resources
+C:\Users\DOMINIKA\Desktop\ASN\TermoLogger_2\obj\x86\Debug\Autonomiczy System Nawigacyjny.csproj.GenerateResource.Cache
+C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\bin\Debug\Autonomiczny System Nawigacyjny.exe.config
+C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczny System Nawigacyjny.exe
+C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczny System Nawigacyjny.pdb
+C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\bin\Debug\Autonomiczny System Nawigacyjny.exe
+C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\bin\Debug\Autonomiczny System Nawigacyjny.pdb
+C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\bin\Debug\ZedGraph.dll
+C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczy System Nawigacyjny.csprojResolveAssemblyReference.cache
+C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\AutonomicznySystemNawigacyjny.Form1.resources
+C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczny_System_Nawigacyjny.Properties.Resources.resources
+C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczy System Nawigacyjny.csproj.GenerateResource.Cache
