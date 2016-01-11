@@ -42,12 +42,14 @@ namespace AutonomicznySystemNawigacyjny
         public double[] GainGyro1 = new double[3] { 1.0, 1.0, 1.0 };
         public double[] GainGyro2 = new double[3] { 1.0, 1.0, 1.0 };
 
-        public int licznikWykresu = 0;
+        public long licznikWykresu = 0;
         public int licznikRaspberry = 0;
 
         private readonly KalibracjaMagnetometru _kalibracjaMagnetometru = new KalibracjaMagnetometru(3000, 3000, 3000);
         private readonly KalibracjaBiasGyro _kalibracjaBiasGyro1 = new KalibracjaBiasGyro();
         private readonly KalibracjaBiasGyro _kalibracjaBiasGyro2 = new KalibracjaBiasGyro();
+        private readonly UzyskajKatyZAkcelerometru _katyAkcel1 = new UzyskajKatyZAkcelerometru();
+        private readonly UzyskajKatyZAkcelerometru _katyAkcel2 = new UzyskajKatyZAkcelerometru();
 
         MahonyAHRS MahonyFilter= new MahonyAHRS(0.002f); // ZMIENIC ARGUMENT
         MadgwickAHRS MadgwickFilter = new MadgwickAHRS(0.002f);
@@ -139,8 +141,20 @@ namespace AutonomicznySystemNawigacyjny
             string[] dane = new string[16];
             dane = rx_str.Split(',');
 
-            przepiszDane(dane);
-            konwertujDane();
+            konwertujDane(dane);
+            wypiszDane();
+
+            gyro1[0] = Convert.ToDouble(dane[2].Replace('.', ','));
+            kalibracjaCalosci();
+
+            _katyAkcel1.PrzeliczKaty(akcel1[0], akcel1[1], akcel1[2]);
+            _katyAkcel2.PrzeliczKaty(akcel2[0], akcel2[1], akcel2[2]);
+
+            tRollAkcel1.Text = Convert.ToString(_katyAkcel1.roll);
+            tRollAkcel2.Text = Convert.ToString(_katyAkcel2.roll);
+
+            tPitchAkcel1.Text = Convert.ToString(_katyAkcel1.pitch);
+            tPitchAkcel2.Text = Convert.ToString(_katyAkcel2.pitch);
 
             //if (tabControl2.SelectedTab == PageCOM)
             //{
@@ -157,29 +171,9 @@ namespace AutonomicznySystemNawigacyjny
 
 
             //}
-            gyro1Kalibracja[0] = Math.Round(gyro1[0] * GainGyro1[0]  - _kalibracjaBiasGyro1.SredniaX,4);
-            gyro1Kalibracja[1] = Math.Round(gyro1[1] * GainGyro1[1] - _kalibracjaBiasGyro1.SredniaY,4);
-            gyro1Kalibracja[2] = Math.Round(gyro1[2] * GainGyro1[2] - _kalibracjaBiasGyro1.SredniaZ,4);
 
-            tGyro1XKalib.Text = Convert.ToString(gyro1Kalibracja[0]);
-            tGyro1YKalib.Text = Convert.ToString(gyro1Kalibracja[1]);
-            tGyro1ZKalib.Text = Convert.ToString(gyro1Kalibracja[2]);
 
-            gyro2Kalibracja[0] = Math.Round(gyro2[0] * GainGyro2[0] - _kalibracjaBiasGyro2.SredniaX,4);
-            gyro2Kalibracja[1] = Math.Round(gyro2[1] * GainGyro2[1] - _kalibracjaBiasGyro2.SredniaY,4);
-            gyro2Kalibracja[2] = Math.Round(gyro2[2] * GainGyro2[2] - _kalibracjaBiasGyro2.SredniaZ,4);
 
-            tGyro2XKalib.Text = Convert.ToString(gyro2Kalibracja[0]);
-            tGyro2YKalib.Text = Convert.ToString(gyro2Kalibracja[1]);
-            tGyro2ZKalib.Text = Convert.ToString(gyro2Kalibracja[2]);
-
-            magnetKalibracja[0] = Math.Round(magnet[0] * _kalibracjaMagnetometru.GainX + _kalibracjaMagnetometru.OffsetX, 0);
-            magnetKalibracja[1] = Math.Round(magnet[1] * _kalibracjaMagnetometru.GainY + _kalibracjaMagnetometru.OffsetY, 0);
-            magnetKalibracja[2] = Math.Round(magnet[2] * _kalibracjaMagnetometru.GainZ + _kalibracjaMagnetometru.OffsetZ, 0);
-
-            tMagnet1XKalib.Text = Convert.ToString(magnetKalibracja[0]);
-            tMagnet1YKalib.Text = Convert.ToString(magnetKalibracja[1]);
-            tMagnet1ZKalib.Text = Convert.ToString(magnetKalibracja[2]);
 
 
 
@@ -199,54 +193,85 @@ namespace AutonomicznySystemNawigacyjny
             licznikWykresu++;
         }
 
-        private void przepiszDane(string[] wejscie)
+        private void kalibracjaCalosci()
         {
-            
-            textBox16.Text = wejscie[0];
+            gyro1Kalibracja[0] = Math.Round(gyro1[0] * GainGyro1[0] - _kalibracjaBiasGyro1.SredniaX, 4);
+            gyro1Kalibracja[1] = Math.Round(gyro1[1] * GainGyro1[1] - _kalibracjaBiasGyro1.SredniaY, 4);
+            gyro1Kalibracja[2] = Math.Round(gyro1[2] * GainGyro1[2] - _kalibracjaBiasGyro1.SredniaZ, 4);
 
-            textBox1.Text = wejscie[1];
-            textBox2.Text = wejscie[2];
-            textBox3.Text = wejscie[3];
+            tGyro1XKalib.Text = Convert.ToString(gyro1Kalibracja[0]);
+            tGyro1YKalib.Text = Convert.ToString(gyro1Kalibracja[1]);
+            tGyro1ZKalib.Text = Convert.ToString(gyro1Kalibracja[2]);
 
-            textBox4.Text = wejscie[4];
-            textBox5.Text = wejscie[5];
-            textBox6.Text = wejscie[6];
+            gyro2Kalibracja[0] = Math.Round(gyro2[0] * GainGyro2[0] - _kalibracjaBiasGyro2.SredniaX, 4);
+            gyro2Kalibracja[1] = Math.Round(gyro2[1] * GainGyro2[1] - _kalibracjaBiasGyro2.SredniaY, 4);
+            gyro2Kalibracja[2] = Math.Round(gyro2[2] * GainGyro2[2] - _kalibracjaBiasGyro2.SredniaZ, 4);
 
-            textBox10.Text = wejscie[7];
-            textBox11.Text = wejscie[8];
-            textBox12.Text = wejscie[9];
+            tGyro2XKalib.Text = Convert.ToString(gyro2Kalibracja[0]);
+            tGyro2YKalib.Text = Convert.ToString(gyro2Kalibracja[1]);
+            tGyro2ZKalib.Text = Convert.ToString(gyro2Kalibracja[2]);
 
-            textBox13.Text = wejscie[10];
-            textBox14.Text = wejscie[11];
-            textBox15.Text = wejscie[12];
+            magnetKalibracja[0] = Math.Round(magnet[0] * _kalibracjaMagnetometru.GainX + _kalibracjaMagnetometru.OffsetX, 0);
+            magnetKalibracja[1] = Math.Round(magnet[1] * _kalibracjaMagnetometru.GainY + _kalibracjaMagnetometru.OffsetY, 0);
+            magnetKalibracja[2] = Math.Round(magnet[2] * _kalibracjaMagnetometru.GainZ + _kalibracjaMagnetometru.OffsetZ, 0);
 
-            textBox7.Text = wejscie[13];
-            textBox8.Text = wejscie[14];
-            textBox9.Text = wejscie[15];
-            
+            tMagnet1XKalib.Text = Convert.ToString(magnetKalibracja[0]);
+            tMagnet1YKalib.Text = Convert.ToString(magnetKalibracja[1]);
+            tMagnet1ZKalib.Text = Convert.ToString(magnetKalibracja[2]);
         }
 
-        private void konwertujDane()
+
+        private void wypiszDane()
         {
-            gyro1[0] = -Convert.ToDouble(textBox2.Text.Replace('.', ','));
-            gyro1[1] = -Convert.ToDouble(textBox1.Text.Replace('.', ','));
-            gyro1[2] = Convert.ToDouble(textBox3.Text.Replace('.', ','));
+            
+            textBox16.Text = Convert.ToString(licznikRaspberry);
 
-            gyro2[0] = Convert.ToDouble(textBox10.Text.Replace('.', ','));
-            gyro2[1] = -Convert.ToDouble(textBox11.Text.Replace('.', ','));
-            gyro2[2] = Convert.ToDouble(textBox12.Text.Replace('.', ','));
+            textBox1.Text = Convert.ToString(gyro1[0]);
+            textBox2.Text = Convert.ToString(gyro1[1]);
+            textBox3.Text = Convert.ToString(gyro1[2]);
 
-            akcel1[0] = Convert.ToDouble(textBox5.Text.Replace('.', ','));
-            akcel1[1] = -Convert.ToDouble(textBox4.Text.Replace('.', ','));
-            akcel1[2] = Convert.ToDouble(textBox6.Text.Replace('.', ','));
+            textBox4.Text = Convert.ToString(akcel1[0]);
+            textBox5.Text = Convert.ToString(akcel1[1]);
+            textBox6.Text = Convert.ToString(akcel1[2]);
 
-            akcel2[0] = Convert.ToDouble(textBox13.Text.Replace('.', ','));
-            akcel2[1] = -Convert.ToDouble(textBox14.Text.Replace('.', ','));
-            akcel2[2] = -Convert.ToDouble(textBox15.Text.Replace('.', ','));
+            textBox10.Text = Convert.ToString(gyro2[0]);
+            textBox11.Text = Convert.ToString(gyro2[1]);
+            textBox12.Text = Convert.ToString(gyro2[2]);
 
-            magnet[0] = Convert.ToDouble(textBox7.Text.Replace('.', ','));
-            magnet[1] = -Convert.ToDouble(textBox8.Text.Replace('.', ','));
-            magnet[2] = Convert.ToDouble(textBox9.Text.Replace('.', ','));
+            textBox13.Text = Convert.ToString(akcel2[0]);
+            textBox14.Text = Convert.ToString(akcel2[1]);
+            textBox15.Text = Convert.ToString(akcel2[2]);
+
+            textBox7.Text = Convert.ToString(magnet[0]);
+            textBox8.Text = Convert.ToString(magnet[1]);
+            textBox9.Text = Convert.ToString(magnet[2]);
+
+        }
+
+        private void konwertujDane(string[] dane)
+        {
+            
+            gyro1[0] = -Convert.ToDouble(dane[2].Replace('.', ','));
+            gyro1[1] = -Convert.ToDouble(dane[1].Replace('.', ','));
+            gyro1[2] = Convert.ToDouble(dane[3].Replace('.', ','));
+
+            gyro2[0] = Convert.ToDouble(dane[7].Replace('.', ','));
+            gyro2[1] = -Convert.ToDouble(dane[8].Replace('.', ','));
+            gyro2[2] = Convert.ToDouble(dane[9].Replace('.', ','));
+
+            akcel1[0] = Convert.ToDouble(dane[5].Replace('.', ','));
+            akcel1[1] = -Convert.ToDouble(dane[4].Replace('.', ','));
+            akcel1[2] = Convert.ToDouble(dane[6].Replace('.', ','));
+
+            akcel2[0] = Convert.ToDouble(dane[10].Replace('.', ','));
+            akcel2[1] = -Convert.ToDouble(dane[11].Replace('.', ','));
+            akcel2[2] = -Convert.ToDouble(dane[12].Replace('.', ','));
+
+            magnet[0] = Convert.ToDouble(dane[13].Replace('.', ','));
+            magnet[1] = -Convert.ToDouble(dane[14].Replace('.', ','));
+            magnet[2] = Convert.ToDouble(dane[15].Replace('.', ','));
+
+            licznikRaspberry = (int)Convert.ToInt64(dane[0]);
         }
 
         private void InicjalizujWykresy()
@@ -660,6 +685,8 @@ namespace AutonomicznySystemNawigacyjny
 
         private void KalibrujMagnetometr()
         {
+            _kalibracjaMagnetometru.czysc();
+
             for (int i = 0; i < 150000; i++)
             {
                 _kalibracjaMagnetometru.AddValues(magnet[0], magnet[1], magnet[2]);

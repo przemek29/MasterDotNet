@@ -128,6 +128,25 @@ namespace Autonomiczny_System_Nawigacyjny
             if (z < MinZ)
                 MinZ = z;
         }
+       
+        public void czysc()
+        {
+            MinX = 0;
+            MinY = 0;
+            MinZ = 0;
+
+            MaxX = 0;
+            MaxY = 0;
+            MaxZ = 0;
+
+            GainX = 0;
+            GainY = 0;
+            GainZ = 0;
+
+            OffsetX = 0;
+            OffsetY = 0;
+            OffsetZ = 0;
+        }
     }
 }
 
