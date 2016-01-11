@@ -424,6 +424,8 @@
             this.accelAlignment21 = new System.Windows.Forms.TextBox();
             this.accelAlignment22 = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.label118 = new System.Windows.Forms.Label();
+            this.tCzestotliwosc = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -755,15 +757,15 @@
             // 
             // textBox16
             // 
-            this.textBox16.Location = new System.Drawing.Point(96, 22);
+            this.textBox16.Location = new System.Drawing.Point(70, 24);
             this.textBox16.Name = "textBox16";
-            this.textBox16.Size = new System.Drawing.Size(100, 20);
+            this.textBox16.Size = new System.Drawing.Size(69, 20);
             this.textBox16.TabIndex = 31;
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(32, 25);
+            this.label10.Location = new System.Drawing.Point(6, 27);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(58, 13);
             this.label10.TabIndex = 32;
@@ -2421,6 +2423,8 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.label118);
+            this.groupBox2.Controls.Add(this.tCzestotliwosc);
             this.groupBox2.Controls.Add(this.Magnetometr);
             this.groupBox2.Controls.Add(this.groupBox4);
             this.groupBox2.Controls.Add(this.groupBox3);
@@ -4054,6 +4058,22 @@
             this.tabPage3.Text = "Sektor Graficzny";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // label118
+            // 
+            this.label118.AutoSize = true;
+            this.label118.Location = new System.Drawing.Point(143, 27);
+            this.label118.Name = "label118";
+            this.label118.Size = new System.Drawing.Size(71, 13);
+            this.label118.TabIndex = 37;
+            this.label118.Text = "Częstotliwość";
+            // 
+            // tCzestotliwosc
+            // 
+            this.tCzestotliwosc.Location = new System.Drawing.Point(220, 24);
+            this.tCzestotliwosc.Name = "tCzestotliwosc";
+            this.tCzestotliwosc.Size = new System.Drawing.Size(66, 20);
+            this.tCzestotliwosc.TabIndex = 36;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -4520,6 +4540,8 @@
         private System.Windows.Forms.Label label101;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Label label118;
+        private System.Windows.Forms.TextBox tCzestotliwosc;
     }
 }
 

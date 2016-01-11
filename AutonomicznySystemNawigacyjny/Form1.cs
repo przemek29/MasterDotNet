@@ -20,7 +20,8 @@ namespace AutonomicznySystemNawigacyjny
             InitializeComponent();
 
         }
-
+        public long millisecondTime { get; set; }
+        public int rzad = 10;
 
         public string rx_str = " ";
         public int licznik = 0;
@@ -51,11 +52,13 @@ namespace AutonomicznySystemNawigacyjny
         private readonly UzyskajKatyZAkcelerometru _katyAkcel1 = new UzyskajKatyZAkcelerometru();
         private readonly UzyskajKatyZAkcelerometru _katyAkcel2 = new UzyskajKatyZAkcelerometru();
 
+        
         MahonyAHRS MahonyFilter= new MahonyAHRS(0.002f); // ZMIENIC ARGUMENT
         MadgwickAHRS MadgwickFilter = new MadgwickAHRS(0.002f);
         KalmanFilter kalman = new KalmanFilter(0.001, 0.003, 0.03);
 
-
+        Stopwatch stopWatch = new Stopwatch();
+        TimeSpan timeSpan;
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -101,9 +104,10 @@ namespace AutonomicznySystemNawigacyjny
 
         }
 
-        private void odbieranieDanych()
+        
+        private void MySerialPortOnDataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs serialDataReceivedEventArgs)
         {
-
+            throw new NotImplementedException();
         }
 
         private void serialPort1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
@@ -135,27 +139,27 @@ namespace AutonomicznySystemNawigacyjny
         // utworzenie zdarzenia  parsującego łańcuch odbierany przez rs232
 
         private void rx_parse(object sender, EventArgs e)
-        { 
+        {
 
-
+            
+            if (licznikRaspberry % rzad == 0)
+            {
+                stopWatch.Restart();
+            }
             string[] dane = new string[16];
             dane = rx_str.Split(',');
+            
+
 
             konwertujDane(dane);
             wypiszDane();
 
             gyro1[0] = Convert.ToDouble(dane[2].Replace('.', ','));
-            kalibracjaCalosci();
+            kalibracjaZyroskopow();
 
-            _katyAkcel1.PrzeliczKaty(akcel1[0], akcel1[1], akcel1[2]);
-            _katyAkcel2.PrzeliczKaty(akcel2[0], akcel2[1], akcel2[2]);
+            KatyZAkcelerometru();
 
-            tRollAkcel1.Text = Convert.ToString(_katyAkcel1.roll);
-            tRollAkcel2.Text = Convert.ToString(_katyAkcel2.roll);
-
-            tPitchAkcel1.Text = Convert.ToString(_katyAkcel1.pitch);
-            tPitchAkcel2.Text = Convert.ToString(_katyAkcel2.pitch);
-
+            
             //if (tabControl2.SelectedTab == PageCOM)
             //{
 
@@ -191,9 +195,30 @@ namespace AutonomicznySystemNawigacyjny
             }
 
             licznikWykresu++;
+            if (licznikRaspberry % rzad == 0)
+            {
+                stopWatch.Stop();
+                millisecondTime= stopWatch.ElapsedMilliseconds;
+               
+                double czestotliwosc = Math.Round(rzad * ((1 / (double)millisecondTime) * 1000));
+                tCzestotliwosc.Text = Convert.ToString(czestotliwosc);
+            }
         }
+        
 
-        private void kalibracjaCalosci()
+        private void KatyZAkcelerometru()
+        {
+            _katyAkcel1.PrzeliczKaty(akcel1[0], akcel1[1], akcel1[2]);
+            _katyAkcel2.PrzeliczKaty(akcel2[0], akcel2[1], akcel2[2]);
+
+            tRollAkcel1.Text = Convert.ToString(_katyAkcel1.roll);
+            tRollAkcel2.Text = Convert.ToString(_katyAkcel2.roll);
+
+            tPitchAkcel1.Text = Convert.ToString(_katyAkcel1.pitch);
+            tPitchAkcel2.Text = Convert.ToString(_katyAkcel2.pitch);
+
+        }
+        private void kalibracjaZyroskopow()
         {
             gyro1Kalibracja[0] = Math.Round(gyro1[0] * GainGyro1[0] - _kalibracjaBiasGyro1.SredniaX, 4);
             gyro1Kalibracja[1] = Math.Round(gyro1[1] * GainGyro1[1] - _kalibracjaBiasGyro1.SredniaY, 4);
