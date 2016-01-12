@@ -69,6 +69,7 @@
     <Compile Include="KalmanFilter.cs" />
     <Compile Include="Madgwick.cs" />
     <Compile Include="MahonyFilter.cs" />
+    <Compile Include="MahonyZC.cs" />
     <Compile Include="MetodaSimpsona.cs" />
     <Compile Include="MetodaTrapezow.cs" />
     <Compile Include="OdczytKursu.cs" />

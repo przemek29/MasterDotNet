@@ -80,7 +80,10 @@ namespace AutonomicznySystemNawigacyjny
         private readonly MetodaTrapezow _trapezKaty = new MetodaTrapezow();
         private readonly OdczytKursu _odczytKursu = new OdczytKursu();
         private readonly MetodaTrapezow _trapezyPredkosci = new MetodaTrapezow();
-       
+
+        private readonly MahonyRozbudowany _mahonyZestaw1 = new MahonyRozbudowany();
+        private readonly MahonyRozbudowany _mahonyZestaw2 = new MahonyRozbudowany();
+
         //test
         private readonly MetodaTrapezow _predkoscLiniowa1 = new MetodaTrapezow();
         private readonly MetodaTrapezow _droga1 = new MetodaTrapezow();
@@ -211,10 +214,28 @@ namespace AutonomicznySystemNawigacyjny
             PrzepiszSuroweKaty();
 
 
+            
+
 
             //test
             if (kalibracjaKoniecAkcel == true)
             {
+
+                _mahonyZestaw1.MahonyAHRSupdateIMU(gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2], akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], czestotliwosc);
+                _mahonyZestaw2.MahonyAHRSupdateIMU(gyro2Kalibracja[0], gyro2Kalibracja[1], gyro2Kalibracja[2], akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2], czestotliwosc);
+
+                tMahony1Q0.Text = Convert.ToString(_mahonyZestaw1.q0);
+                tMahony1Q1.Text = Convert.ToString(_mahonyZestaw1.q1);
+                tMahony1Q2.Text = Convert.ToString(_mahonyZestaw1.q2);
+                tMahony1Q3.Text = Convert.ToString(_mahonyZestaw1.q3);
+
+                tMahony2Q0.Text = Convert.ToString(_mahonyZestaw2.q0);
+                tMahony2Q1.Text = Convert.ToString(_mahonyZestaw2.q1);
+                tMahony2Q2.Text = Convert.ToString(_mahonyZestaw2.q2);
+                tMahony2Q3.Text = Convert.ToString(_mahonyZestaw2.q3);
+
+
+
 
                 double kalRoll1 = Math.Round(kalman1.update(rollAkcel[0],gyro1Kalibracja[0],1/czestotliwosc));
                 double kalPitch1 = Math.Round(kalman2.update(pitchAkcel[0], gyro1Kalibracja[1], 1 / czestotliwosc));
