@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FiltrKomplementarny.cs" />
+    <Compile Include="FiltrMadgwicka.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -66,6 +67,7 @@
     </Compile>
     <Compile Include="KalibracjaBias.cs" />
     <Compile Include="KalibracjaMagnetometru.cs" />
+    <Compile Include="KalibracjaWspolczynnikow.cs" />
     <Compile Include="KalmanFilter.cs" />
     <Compile Include="Madgwick.cs" />
     <Compile Include="MahonyFilter.cs" />

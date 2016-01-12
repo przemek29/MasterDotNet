@@ -57,12 +57,27 @@ namespace AutonomicznySystemNawigacyjny
         public double[] rollAkcel = new double[2];
         public double[] pitchAkcel = new double[2];
 
+        public double[] mahony1Q = new double[4];
+        public double[] mahony2Q = new double[4];
+
+        public double[] madgwick1Q = new double[4];
+        public double[] madgwick2Q = new double[4];
+
+        public double[] buforGyro1X = new double[11];
+        public double[] buforGyro1Y = new double[11];
+        public double[] buforGyro1Z = new double[11];
+
+        public double[] buforGyro2X = new double[11];
+        public double[] buforGyro2Y = new double[11];
+        public double[] buforGyro2Z = new double[11];
+
+
         public double[] surowaPredkosc = new double [6];
 
         public double deklinacja;
         public double kursDeklinacja;
 
-
+        public int[] licznikWspolczynnikowGyro = new int[6] { 1,1,1,1,1,1};
         public long licznikWykresu = 0;
         public int licznikRaspberry = 0;
 
@@ -83,6 +98,17 @@ namespace AutonomicznySystemNawigacyjny
 
         private readonly MahonyRozbudowany _mahonyZestaw1 = new MahonyRozbudowany();
         private readonly MahonyRozbudowany _mahonyZestaw2 = new MahonyRozbudowany();
+
+        private readonly FiltrMadgwicka _madgwickZestaw1 = new FiltrMadgwicka();
+        private readonly FiltrMadgwicka _madgwickZestaw2 = new FiltrMadgwicka();
+
+        private readonly KalibracjaWspolczynnikow _kalWspolGyro1X = new KalibracjaWspolczynnikow();
+        private readonly KalibracjaWspolczynnikow _kalWspolGyro1Y = new KalibracjaWspolczynnikow();
+        private readonly KalibracjaWspolczynnikow _kalWspolGyro1Z = new KalibracjaWspolczynnikow();
+
+        private readonly KalibracjaWspolczynnikow _kalWspolGyro2X = new KalibracjaWspolczynnikow();
+        private readonly KalibracjaWspolczynnikow _kalWspolGyro2Y = new KalibracjaWspolczynnikow();
+        private readonly KalibracjaWspolczynnikow _kalWspolGyro2Z = new KalibracjaWspolczynnikow();
 
         //test
         private readonly MetodaTrapezow _predkoscLiniowa1 = new MetodaTrapezow();
@@ -221,20 +247,10 @@ namespace AutonomicznySystemNawigacyjny
             if (kalibracjaKoniecAkcel == true)
             {
 
-                _mahonyZestaw1.MahonyAHRSupdateIMU(gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2], akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], czestotliwosc);
-                _mahonyZestaw2.MahonyAHRSupdateIMU(gyro2Kalibracja[0], gyro2Kalibracja[1], gyro2Kalibracja[2], akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2], czestotliwosc);
-
-                tMahony1Q0.Text = Convert.ToString(_mahonyZestaw1.q0);
-                tMahony1Q1.Text = Convert.ToString(_mahonyZestaw1.q1);
-                tMahony1Q2.Text = Convert.ToString(_mahonyZestaw1.q2);
-                tMahony1Q3.Text = Convert.ToString(_mahonyZestaw1.q3);
-
-                tMahony2Q0.Text = Convert.ToString(_mahonyZestaw2.q0);
-                tMahony2Q1.Text = Convert.ToString(_mahonyZestaw2.q1);
-                tMahony2Q2.Text = Convert.ToString(_mahonyZestaw2.q2);
-                tMahony2Q3.Text = Convert.ToString(_mahonyZestaw2.q3);
+                kwaternionyMahony();
 
 
+                
 
 
                 double kalRoll1 = Math.Round(kalman1.update(rollAkcel[0],gyro1Kalibracja[0],1/czestotliwosc));
@@ -275,6 +291,51 @@ namespace AutonomicznySystemNawigacyjny
             helperCzestotliwosci();
             licznikWykresu++;
             
+        }
+        private void kwaternionyMadgwick()
+        {
+            _madgwickZestaw1.MadgwickAHRSupdateIMU(mahony1Q, czestotliwosc, akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2]);
+            _madgwickZestaw2.MadgwickAHRSupdateIMU(mahony2Q, czestotliwosc, akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2], gyro2Kalibracja[0], gyro2Kalibracja[1], gyro2Kalibracja[2]);
+
+            madgwick1Q = _madgwickZestaw1.quaternion;
+            madgwick2Q = _madgwickZestaw2.quaternion;
+
+            tMadgwick1Q0.Text = Convert.ToString(madgwick1Q[0]);
+            tMadgwick1Q1.Text = Convert.ToString(madgwick1Q[1]);
+            tMadgwick1Q2.Text = Convert.ToString(madgwick1Q[2]);
+            tMadgwick1Q3.Text = Convert.ToString(madgwick1Q[3]);
+
+            tMadgwick2Q0.Text = Convert.ToString(madgwick2Q[0]);
+            tMadgwick2Q1.Text = Convert.ToString(madgwick2Q[1]);
+            tMadgwick2Q2.Text = Convert.ToString(madgwick2Q[2]);
+            tMadgwick2Q3.Text = Convert.ToString(madgwick2Q[3]);
+        }
+
+        private void kwaternionyMahony()
+        {
+            _mahonyZestaw1.MahonyAHRSupdateIMU(gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2], akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], czestotliwosc);
+            _mahonyZestaw2.MahonyAHRSupdateIMU(gyro2Kalibracja[0], gyro2Kalibracja[1], gyro2Kalibracja[2], akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2], czestotliwosc);
+
+
+            mahony1Q[0] = _mahonyZestaw1.q0;
+            mahony1Q[1] = _mahonyZestaw1.q1;
+            mahony1Q[2] = _mahonyZestaw1.q2;
+            mahony1Q[3] = _mahonyZestaw1.q3;
+
+            mahony2Q[0] = _mahonyZestaw2.q0;
+            mahony2Q[1] = _mahonyZestaw2.q1;
+            mahony2Q[2] = _mahonyZestaw2.q2;
+            mahony2Q[3] = _mahonyZestaw2.q3;
+
+            tMahony1Q0.Text = Convert.ToString(mahony1Q[0]);
+            tMahony1Q1.Text = Convert.ToString(mahony1Q[1]);
+            tMahony1Q2.Text = Convert.ToString(mahony1Q[2]);
+            tMahony1Q3.Text = Convert.ToString(mahony1Q[3]);
+
+            tMahony2Q0.Text = Convert.ToString(mahony1Q[0]);
+            tMahony2Q1.Text = Convert.ToString(mahony1Q[1]);
+            tMahony2Q2.Text = Convert.ToString(mahony1Q[2]);
+            tMahony2Q3.Text = Convert.ToString(mahony1Q[3]);
         }
         private void PrzepiszSuroweKaty()
         {
@@ -1019,6 +1080,131 @@ namespace AutonomicznySystemNawigacyjny
 
         }
 
-        
+        private void bAxisX1_Click(object sender, EventArgs e)
+        {
+            _kalWspolGyro1X.kalibruj(gyro1Kalibracja[0], licznikWspolczynnikowGyro[0]);
+
+            bAxisX1.Text = Convert.ToString(licznikWspolczynnikowGyro[0]);
+
+            if (licznikWspolczynnikowGyro[0] == 10)
+            {
+                if (_kalWspolGyro1X.Srednia > 0)
+                     GainGyro1[0] = 90.0 /_kalWspolGyro1X.Srednia ;
+
+                if (_kalWspolGyro1X.Srednia < 0)
+                    GainGyro1[0] = -90.0 / _kalWspolGyro1X.Srednia;
+
+                tGainGyro1X.Text = Convert.ToString(GainGyro1[0]);
+                licznikWspolczynnikowGyro[0] = 0;
+                _kalWspolGyro1X.zeruj();
+            }
+            licznikWspolczynnikowGyro[0]++;
+        }
+
+        private void bAxisY1_Click(object sender, EventArgs e)
+        {
+            _kalWspolGyro1X.kalibruj(gyro1Kalibracja[1], licznikWspolczynnikowGyro[1]);
+
+            bAxisY1.Text = Convert.ToString(licznikWspolczynnikowGyro[1]);
+
+            if (licznikWspolczynnikowGyro[1] == 10)
+            {
+                if (_kalWspolGyro1Y.Srednia > 0)
+                    GainGyro1[1] = 90.0 / _kalWspolGyro1Y.Srednia;
+
+                if (_kalWspolGyro1Y.Srednia < 0)
+                    GainGyro1[1] = -90.0 / _kalWspolGyro1Y.Srednia;
+
+                tGainGyro1Y.Text = Convert.ToString(GainGyro1[1]);
+                licznikWspolczynnikowGyro[1] = 0;
+                _kalWspolGyro1Y.zeruj();
+            }
+            licznikWspolczynnikowGyro[1]++;
+        }
+
+        private void bAxisZ1_Click(object sender, EventArgs e)
+        {
+            _kalWspolGyro1Z.kalibruj(gyro1Kalibracja[2], licznikWspolczynnikowGyro[2]);
+
+            bAxisZ1.Text = Convert.ToString(licznikWspolczynnikowGyro[2]);
+
+            if (licznikWspolczynnikowGyro[2] == 10)
+            {
+                if (_kalWspolGyro1Z.Srednia > 0)
+                    GainGyro1[2] = 90.0 / _kalWspolGyro1Z.Srednia;
+
+                if (_kalWspolGyro1Z.Srednia < 0)
+                    GainGyro1[2] = -90.0 / _kalWspolGyro1Z.Srednia;
+
+                tGainGyro1Z.Text = Convert.ToString(GainGyro1[2]);
+                licznikWspolczynnikowGyro[2] = 0;
+                _kalWspolGyro1Z.zeruj();
+            }
+            licznikWspolczynnikowGyro[2]++;
+        }
+
+        private void bAxisX2_Click(object sender, EventArgs e)
+        {
+            _kalWspolGyro2X.kalibruj(gyro2Kalibracja[0], licznikWspolczynnikowGyro[3]);
+
+            bAxisX2.Text = Convert.ToString(licznikWspolczynnikowGyro[3]);
+
+            if (licznikWspolczynnikowGyro[3] == 10)
+            {
+                if (_kalWspolGyro2X.Srednia > 0)
+                    GainGyro2[0] = 90.0 / _kalWspolGyro2X.Srednia;
+
+                if (_kalWspolGyro2X.Srednia < 0)
+                    GainGyro2[0] = -90.0 / _kalWspolGyro2X.Srednia;
+
+                tGainGyro2X.Text = Convert.ToString(GainGyro2[0]);
+                licznikWspolczynnikowGyro[3] = 0;
+                _kalWspolGyro2X.zeruj();
+            }
+            licznikWspolczynnikowGyro[3]++;
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            _kalWspolGyro2Y.kalibruj(gyro2Kalibracja[1], licznikWspolczynnikowGyro[4]);
+
+            bAxisY2.Text = Convert.ToString(licznikWspolczynnikowGyro[4]);
+
+            if (licznikWspolczynnikowGyro[4] == 10)
+            {
+                if (_kalWspolGyro2Y.Srednia > 0)
+                    GainGyro2[1] = 90.0 / _kalWspolGyro2Y.Srednia;
+
+                if (_kalWspolGyro2Y.Srednia < 0)
+                    GainGyro2[1] = -90.0 / _kalWspolGyro2Y.Srednia;
+
+                tGainGyro2Y.Text = Convert.ToString(GainGyro2[1]);
+                licznikWspolczynnikowGyro[4] = 0;
+                _kalWspolGyro2Y.zeruj();
+            }
+            licznikWspolczynnikowGyro[4]++;
+
+        }
+
+        private void bAxisZ2_Click(object sender, EventArgs e)
+        {
+            _kalWspolGyro2Z.kalibruj(gyro2Kalibracja[2], licznikWspolczynnikowGyro[5]);
+
+            bAxisZ2.Text = Convert.ToString(licznikWspolczynnikowGyro[5]);
+
+            if (licznikWspolczynnikowGyro[5] == 10)
+            {
+                if (_kalWspolGyro2Z.Srednia > 0)
+                    GainGyro2[2] = 90.0 / _kalWspolGyro2Z.Srednia;
+
+                if (_kalWspolGyro2Z.Srednia < 0)
+                    GainGyro2[2] = -90.0 / _kalWspolGyro2Z.Srednia;
+
+                tGainGyro2Z.Text = Convert.ToString(GainGyro2[2]);
+                licznikWspolczynnikowGyro[5] = 0;
+                _kalWspolGyro2Z.zeruj();
+            }
+            licznikWspolczynnikowGyro[5]++;
+        }
     }
 }
