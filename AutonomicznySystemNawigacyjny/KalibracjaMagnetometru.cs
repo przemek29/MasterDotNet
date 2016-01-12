@@ -146,6 +146,8 @@ namespace Autonomiczny_System_Nawigacyjny
             OffsetX = 0;
             OffsetY = 0;
             OffsetZ = 0;
+            
+            
         }
     }
 }

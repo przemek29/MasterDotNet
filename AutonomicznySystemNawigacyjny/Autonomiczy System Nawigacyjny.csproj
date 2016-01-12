@@ -63,13 +63,14 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="KalibracjaBiasGyro.cs" />
+    <Compile Include="KalibracjaBias.cs" />
     <Compile Include="KalibracjaMagnetometru.cs" />
     <Compile Include="KalmanFilter.cs" />
     <Compile Include="Madgwick.cs" />
     <Compile Include="MahonyFilter.cs" />
     <Compile Include="MetodaSimpsona.cs" />
     <Compile Include="MetodaTrapezow.cs" />
+    <Compile Include="OdczytKursu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UzyskajKatyZAkcelerometru.cs" />
