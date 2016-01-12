@@ -54,6 +54,9 @@ namespace AutonomicznySystemNawigacyjny
         public double[] przyspieszeniaKalibrowane = new double[6];
         public double[] katyCalkowane = new double[6];
 
+        public double[] rollAkcel = new double[2];
+        public double[] pitchAkcel = new double[2];
+
         public double[] surowaPredkosc = new double [6];
 
         public double deklinacja;
@@ -71,10 +74,8 @@ namespace AutonomicznySystemNawigacyjny
 
         private readonly UzyskajKatyZAkcelerometru _katyAkcel1 = new UzyskajKatyZAkcelerometru();
         private readonly UzyskajKatyZAkcelerometru _katyAkcel2 = new UzyskajKatyZAkcelerometru();
-        //test
-        private readonly UzyskajKatyZAkcelerometru KAkcel1 = new UzyskajKatyZAkcelerometru();
-        private readonly UzyskajKatyZAkcelerometru KAkcel2 = new UzyskajKatyZAkcelerometru();
-        //test
+
+        private readonly FiltrKomplementarny _komplementarny = new FiltrKomplementarny();
 
         private readonly MetodaTrapezow _trapezKaty = new MetodaTrapezow();
         private readonly OdczytKursu _odczytKursu = new OdczytKursu();
@@ -186,27 +187,41 @@ namespace AutonomicznySystemNawigacyjny
             konwertujDane(dane);
             wypiszDane();
 
+            if (radioButton1.Checked)
+            {
+                KalibrujMagnetometr();
+            }
             kalibracjaZyroskopow();
             kalibracjaMagnetometru();
             kalibracjaAkcelerometrów();
 
             KatyZAkcelerometru();
-
             KatyZZyroskopu();
-
-            
-
-            if (radioButton1.Checked)
-            {
-                KalibrujMagnetometr();
-            }
-
             ObliczKursy();
 
+            var drogaX = 0;
+
+            helperKomplementarny();
             
             helperCzestotliwosci();
             licznikWykresu++;
             
+        }
+
+        private void helperKomplementarny()
+        {
+            var roll1 = Math.Round(_komplementarny.oblicz(rollAkcel[0], gyro1Kalibracja[0], akcel1Kalibracja[0], 1 / czestotliwosc), 1);
+            var pitch1 = Math.Round(_komplementarny.oblicz(pitchAkcel[0], gyro1Kalibracja[1], akcel1Kalibracja[1], 1 / czestotliwosc), 1);
+
+            var roll2 = Math.Round(_komplementarny.oblicz(rollAkcel[1], gyro2Kalibracja[0], akcel2Kalibracja[0], 1 / czestotliwosc), 1);
+            var pitch2 = Math.Round(_komplementarny.oblicz(pitchAkcel[1], gyro2Kalibracja[1], akcel2Kalibracja[1], 1 / czestotliwosc), 1);
+
+
+            tRollKomplementarny1.Text = Convert.ToString(roll1);
+            tPitchKomplementarny1.Text = Convert.ToString(pitch1);
+
+            tRollKomplementarny2.Text = Convert.ToString(roll2);
+            tPitchKomplementarny2.Text = Convert.ToString(pitch2);
         }
 
         private void helperCzestotliwosci()
@@ -292,20 +307,16 @@ namespace AutonomicznySystemNawigacyjny
             _katyAkcel1.PrzeliczKaty(akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2]);
             _katyAkcel2.PrzeliczKaty(akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2]);
 
-            //test
-            KAkcel1.PrzeliczKaty(akcel1[0], akcel1[1], akcel1[2]);
-            KAkcel2.PrzeliczKaty(akcel2[0], akcel2[1], akcel2[2]);
-            tAk1X.Text = Convert.ToString(KAkcel1.roll);
-            tAk1Y.Text = Convert.ToString(KAkcel1.pitch);
+            rollAkcel[0] = _katyAkcel1.roll;
+            rollAkcel[1] = _katyAkcel2.roll;
+            pitchAkcel[0] = _katyAkcel1.pitch;
+            pitchAkcel[1] = _katyAkcel2.pitch;
 
-            tAk2X.Text = Convert.ToString(KAkcel2.roll);
-            tAk2Y.Text = Convert.ToString(KAkcel2.pitch);
-            //test
-            tRollAkcel1.Text = Convert.ToString(_katyAkcel1.roll);
-            tRollAkcel2.Text = Convert.ToString(_katyAkcel2.roll);
+            tRollAkcel1.Text = Convert.ToString(rollAkcel[0]);
+            tRollAkcel2.Text = Convert.ToString(rollAkcel[1]);
 
-            tPitchAkcel1.Text = Convert.ToString(_katyAkcel1.pitch);
-            tPitchAkcel2.Text = Convert.ToString(_katyAkcel2.pitch);
+            tPitchAkcel1.Text = Convert.ToString(pitchAkcel[0]);
+            tPitchAkcel2.Text = Convert.ToString(pitchAkcel[1]);
 
         }
         private void kalibracjaZyroskopow()

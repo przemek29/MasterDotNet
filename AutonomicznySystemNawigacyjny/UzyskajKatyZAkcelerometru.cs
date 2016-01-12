@@ -12,7 +12,8 @@ namespace Autonomiczny_System_Nawigacyjny
         {
             get
             {
-                return Math.Round((Math.Atan2(-AccY , AccZ) * 180.0)/ Math.PI,2);
+                //return Math.Round((Math.Atan2(-AccY , AccZ) * 180.0)/ Math.PI,2); //GŁUPOTA
+                return Math.Round(Math.Atan2(AccY, Math.Sqrt(AccX*AccX + AccZ*AccZ))*180/Math.PI,2);
             }
 
             set {; }
