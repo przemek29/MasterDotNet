@@ -9,7 +9,7 @@ namespace Autonomiczny_System_Nawigacyjny
     public class MetodaTrapezow
     {
         public double czas { get; set; }
-        public double[] Poprzedni { get; set; } = {0,0,0,0,0,0 };
+        public double[] Poprzedni { get; set; } = { 0, 0, 0, 0, 0, 0 };
         public double[] Calka { get; set; } = { 0, 0, 0, 0, 0, 0 };
         public double[] calka { get; set; } = { 0, 0, 0, 0, 0, 0 };
 
@@ -18,14 +18,14 @@ namespace Autonomiczny_System_Nawigacyjny
             
         }
 
-        public double[] calkuj (double[] aktualniy,  double czas)
+        public double[] calkuj (double[] aktualny,  double czas)
         {
-            for (int i = 0; i < aktualniy.Length; i++)
+            for (int i = 0; i < aktualny.Length; i++)
             {
-                calka[i] = 0.5 * (aktualniy[i] + Poprzedni[i]) * czas;
+                calka[i] = 0.5 * (aktualny[i] + Poprzedni[i]) * czas;
                 Calka[i] += calka[i];
             }
-            Poprzedni = aktualniy;
+            Poprzedni = aktualny;
             return Calka;
         }
     }

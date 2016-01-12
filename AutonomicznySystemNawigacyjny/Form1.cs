@@ -80,13 +80,23 @@ namespace AutonomicznySystemNawigacyjny
         private readonly MetodaTrapezow _trapezKaty = new MetodaTrapezow();
         private readonly OdczytKursu _odczytKursu = new OdczytKursu();
         private readonly MetodaTrapezow _trapezyPredkosci = new MetodaTrapezow();
+       
+        //test
+        private readonly MetodaTrapezow _predkoscLiniowa1 = new MetodaTrapezow();
+        private readonly MetodaTrapezow _droga1 = new MetodaTrapezow();
+
+        //test
+
 
 
         public double[] paczka = new double[9];
 
         MahonyAHRS MahonyFilter = new MahonyAHRS(0.002f); // ZMIENIC ARGUMENT
         MadgwickAHRS MadgwickFilter = new MadgwickAHRS(0.002f);
-        KalmanFilter kalman = new KalmanFilter(0.001, 0.003, 0.03);
+        KalmanFilter kalman1 = new KalmanFilter(0.001, 0.003, 0.03, 100);
+        KalmanFilter kalman2 = new KalmanFilter(0.001, 0.003, 0.03, 100);
+        KalmanFilter kalman3 = new KalmanFilter(0.001, 0.003, 0.03, 100);
+        KalmanFilter kalman4 = new KalmanFilter(0.001, 0.003, 0.03, 100);
 
         Stopwatch stopWatch = new Stopwatch();
 
@@ -198,8 +208,46 @@ namespace AutonomicznySystemNawigacyjny
             KatyZAkcelerometru();
             KatyZZyroskopu();
             ObliczKursy();
+            PrzepiszSuroweKaty();
 
-            var drogaX = 0;
+
+
+            //test
+            if (kalibracjaKoniecAkcel == true)
+            {
+
+                double kalRoll1 = Math.Round(kalman1.update(rollAkcel[0],gyro1Kalibracja[0],1/czestotliwosc));
+                double kalPitch1 = Math.Round(kalman2.update(pitchAkcel[0], gyro1Kalibracja[1], 1 / czestotliwosc));
+
+                double kalRoll2 = Math.Round(kalman3.update(rollAkcel[1], gyro2Kalibracja[0], 1 / czestotliwosc));
+                double kalPitch2 = Math.Round(kalman4.update(pitchAkcel[1], gyro2Kalibracja[1], 1 / czestotliwosc));
+
+                t1.Text = Convert.ToString(kalRoll1);
+                t2.Text = Convert.ToString(kalPitch1);
+
+                t4.Text= Convert.ToString(kalRoll2);
+                t5.Text = Convert.ToString(kalPitch2);
+
+                //var predkosc = _predkoscLiniowa1.calkuj(akcel1Kalibracja, 1 / czestotliwosc);
+
+
+                ////var droga = _droga1.calkuj(predkosc, 1 / czestotliwosc);
+                //var droga1 = 0.5 * akcel1Kalibracja[0] * Math.Pow((1 / czestotliwosc), 2) + predkosc[0] * (1 / czestotliwosc);
+                //var droga2 = 0.5 * akcel1Kalibracja[1] * Math.Pow((1 / czestotliwosc), 2) + predkosc[1] * (1 / czestotliwosc);
+                ////droga[0] = kalman1.update(droga[0], 0.1, czestotliwosc);
+                ////droga[1] = kalman2.update(droga[1], 0.1, czestotliwosc);
+
+                //tVxAkcel1.Text = Convert.ToString(predkosc[0]);
+                //tVyAkcel1.Text = Convert.ToString(predkosc[1]);
+
+
+                //tSxAkcel1.Text = Convert.ToString(droga1);
+                //tSyAkcel1.Text = Convert.ToString(droga2);
+
+
+                //Wykres.Series["Przemieszczenie"].Points.AddXY(Math.Round(droga1,1), Math.Round(droga2,1));
+
+            }//test
 
             helperKomplementarny();
             
@@ -207,14 +255,22 @@ namespace AutonomicznySystemNawigacyjny
             licznikWykresu++;
             
         }
+        private void PrzepiszSuroweKaty()
+        {
+            tSurowyRoll1.Text = Convert.ToString(Math.Round(rollAkcel[0]));
+            tSurowyRoll2.Text = Convert.ToString(Math.Round(rollAkcel[1]));
+
+            tSurowyPitch1.Text = Convert.ToString(Math.Round(pitchAkcel[0]));
+            tSurowyPitch2.Text = Convert.ToString(Math.Round(pitchAkcel[1]));
+        }
 
         private void helperKomplementarny()
         {
-            var roll1 = Math.Round(_komplementarny.oblicz(rollAkcel[0], gyro1Kalibracja[0], akcel1Kalibracja[0], 1 / czestotliwosc), 1);
-            var pitch1 = Math.Round(_komplementarny.oblicz(pitchAkcel[0], gyro1Kalibracja[1], akcel1Kalibracja[1], 1 / czestotliwosc), 1);
+            var roll1 = Math.Round(_komplementarny.oblicz(rollAkcel[0], gyro1Kalibracja[0], akcel1Kalibracja[0], 1 / czestotliwosc));
+            var pitch1 = Math.Round(_komplementarny.oblicz(pitchAkcel[0], gyro1Kalibracja[1], akcel1Kalibracja[1], 1 / czestotliwosc));
 
-            var roll2 = Math.Round(_komplementarny.oblicz(rollAkcel[1], gyro2Kalibracja[0], akcel2Kalibracja[0], 1 / czestotliwosc), 1);
-            var pitch2 = Math.Round(_komplementarny.oblicz(pitchAkcel[1], gyro2Kalibracja[1], akcel2Kalibracja[1], 1 / czestotliwosc), 1);
+            var roll2 = Math.Round(_komplementarny.oblicz(rollAkcel[1], gyro2Kalibracja[0], akcel2Kalibracja[0], 1 / czestotliwosc));
+            var pitch2 = Math.Round(_komplementarny.oblicz(pitchAkcel[1], gyro2Kalibracja[1], akcel2Kalibracja[1], 1 / czestotliwosc));
 
 
             tRollKomplementarny1.Text = Convert.ToString(roll1);
@@ -425,9 +481,9 @@ namespace AutonomicznySystemNawigacyjny
         private void InicjalizujWykresy()
         {
             rysujWykresy();
-            sprawdzZyroskopy();
-            sprawdzAkcelerometry();
-            sprawdzMagnetometry();
+            //sprawdzZyroskopy();
+           // sprawdzAkcelerometry();
+            //sprawdzMagnetometry();
         }
 
         private void czyscWszystko()
@@ -453,165 +509,165 @@ namespace AutonomicznySystemNawigacyjny
             czyscMagnet("Oś Z - HMC5883L");
         }
 
-        private void sprawdzZyroskopy()
-        {
-            if (checkGyro1X.Checked)
-            {
-                wykres1.Series["Oś X - L3G4200D"].Enabled = true;
-            }
+        //private void sprawdzZyroskopy()
+        //{
+        //    if (checkGyro1X.Checked)
+        //    {
+        //        wykres1.Series["Oś X - L3G4200D"].Enabled = true;
+        //    }
 
-            if (!checkGyro1X.Checked)
-            {
-                wykres1.Series["Oś X - L3G4200D"].Enabled = false;
-            }
+        //    if (!checkGyro1X.Checked)
+        //    {
+        //        wykres1.Series["Oś X - L3G4200D"].Enabled = false;
+        //    }
 
-            if (checkGyro1Y.Checked)
-            {
-                wykres1.Series["Oś Y - L3G4200D"].Enabled = true;
-            }
+        //    if (checkGyro1Y.Checked)
+        //    {
+        //        wykres1.Series["Oś Y - L3G4200D"].Enabled = true;
+        //    }
 
-            if (!checkGyro1Y.Checked)
-            {
-                wykres1.Series["Oś Y - L3G4200D"].Enabled = false;
-            }
+        //    if (!checkGyro1Y.Checked)
+        //    {
+        //        wykres1.Series["Oś Y - L3G4200D"].Enabled = false;
+        //    }
 
-            if (checkGyro1Z.Checked)
-            {
-                wykres1.Series["Oś Z - L3G4200D"].Enabled = true;
-            }
+        //    if (checkGyro1Z.Checked)
+        //    {
+        //        wykres1.Series["Oś Z - L3G4200D"].Enabled = true;
+        //    }
 
-            if (!checkGyro1Z.Checked)
-            {
-                wykres1.Series["Oś Z - L3G4200D"].Enabled = false;
-            }
-            //*****************************************************
-            if (checkGyro2X.Checked)
-            {
-                wykres1.Series["Oś X - MPU6050"].Enabled = true;
-            }
+        //    if (!checkGyro1Z.Checked)
+        //    {
+        //        wykres1.Series["Oś Z - L3G4200D"].Enabled = false;
+        //    }
+        //    //*****************************************************
+        //    if (checkGyro2X.Checked)
+        //    {
+        //        wykres1.Series["Oś X - MPU6050"].Enabled = true;
+        //    }
 
-            if (!checkGyro2X.Checked)
-            {
-                wykres1.Series["Oś X - MPU6050"].Enabled = false;
-            }
+        //    if (!checkGyro2X.Checked)
+        //    {
+        //        wykres1.Series["Oś X - MPU6050"].Enabled = false;
+        //    }
 
-            if (checkGyro2Y.Checked)
-            {
-                wykres1.Series["Oś Y - MPU6050"].Enabled = true;
-            }
+        //    if (checkGyro2Y.Checked)
+        //    {
+        //        wykres1.Series["Oś Y - MPU6050"].Enabled = true;
+        //    }
 
-            if (!checkGyro2Y.Checked)
-            {
-                wykres1.Series["Oś Y - MPU6050"].Enabled = false;
-            }
+        //    if (!checkGyro2Y.Checked)
+        //    {
+        //        wykres1.Series["Oś Y - MPU6050"].Enabled = false;
+        //    }
 
-            if (checkGyro2Z.Checked)
-            {
-                wykres1.Series["Oś Z - MPU6050"].Enabled = true;
-            }
+        //    if (checkGyro2Z.Checked)
+        //    {
+        //        wykres1.Series["Oś Z - MPU6050"].Enabled = true;
+        //    }
 
-            if (!checkGyro2Z.Checked)
-            {
-                wykres1.Series["Oś Z - MPU6050"].Enabled = false;
-            }
-        }
+        //    if (!checkGyro2Z.Checked)
+        //    {
+        //        wykres1.Series["Oś Z - MPU6050"].Enabled = false;
+        //    }
+        //}
 
-        private void sprawdzAkcelerometry()
-        {
-            if (checkAkcel1X.Checked)
-            {
-                wykres2.Series["Oś X - ADXL345"].Enabled = true;
-            }
+        //private void sprawdzAkcelerometry()
+        //{
+        //    if (checkAkcel1X.Checked)
+        //    {
+        //        wykres2.Series["Oś X - ADXL345"].Enabled = true;
+        //    }
 
-            if (!checkAkcel1X.Checked)
-            {
-                wykres2.Series["Oś X - ADXL345"].Enabled = false;
-            }
+        //    if (!checkAkcel1X.Checked)
+        //    {
+        //        wykres2.Series["Oś X - ADXL345"].Enabled = false;
+        //    }
 
-            if (checkAkcel1Y.Checked)
-            {
-                wykres2.Series["Oś Y - ADXL345"].Enabled = true;
-            }
+        //    if (checkAkcel1Y.Checked)
+        //    {
+        //        wykres2.Series["Oś Y - ADXL345"].Enabled = true;
+        //    }
 
-            if (!checkAkcel1Y.Checked)
-            {
-                wykres2.Series["Oś Y - ADXL345"].Enabled = false;
-            }
+        //    if (!checkAkcel1Y.Checked)
+        //    {
+        //        wykres2.Series["Oś Y - ADXL345"].Enabled = false;
+        //    }
 
-            if (checkAkcel1Z.Checked)
-            {
-                wykres2.Series["Oś Z - ADXL345"].Enabled = true;
-            }
+        //    if (checkAkcel1Z.Checked)
+        //    {
+        //        wykres2.Series["Oś Z - ADXL345"].Enabled = true;
+        //    }
 
-            if (!checkAkcel1Z.Checked)
-            {
-                wykres2.Series["Oś Z - ADXL345"].Enabled = false;
-            }
+        //    if (!checkAkcel1Z.Checked)
+        //    {
+        //        wykres2.Series["Oś Z - ADXL345"].Enabled = false;
+        //    }
 
-            if (checkAkcel2X.Checked)
-            {
-                wykres2.Series["Oś X - MPU6050"].Enabled = true;
-            }
+        //    if (checkAkcel2X.Checked)
+        //    {
+        //        wykres2.Series["Oś X - MPU6050"].Enabled = true;
+        //    }
 
-            if (!checkAkcel2X.Checked)
-            {
-                wykres2.Series["Oś X - MPU6050"].Enabled = false;
-            }
+        //    if (!checkAkcel2X.Checked)
+        //    {
+        //        wykres2.Series["Oś X - MPU6050"].Enabled = false;
+        //    }
 
-            if (checkAkcel2Y.Checked)
-            {
-                wykres2.Series["Oś Y - MPU6050"].Enabled = true;
-            }
+        //    if (checkAkcel2Y.Checked)
+        //    {
+        //        wykres2.Series["Oś Y - MPU6050"].Enabled = true;
+        //    }
 
-            if (!checkAkcel2Y.Checked)
-            {
-                wykres2.Series["Oś Y - MPU6050"].Enabled = false;
-            }
+        //    if (!checkAkcel2Y.Checked)
+        //    {
+        //        wykres2.Series["Oś Y - MPU6050"].Enabled = false;
+        //    }
 
-            if (checkAkcel2Z.Checked)
-            {
-                wykres2.Series["Oś Z - MPU6050"].Enabled = true;
-            }
+        //    if (checkAkcel2Z.Checked)
+        //    {
+        //        wykres2.Series["Oś Z - MPU6050"].Enabled = true;
+        //    }
 
-            if (!checkAkcel2Z.Checked)
-            {
-                wykres2.Series["Oś Z - MPU6050"].Enabled = false;
-            }
+        //    if (!checkAkcel2Z.Checked)
+        //    {
+        //        wykres2.Series["Oś Z - MPU6050"].Enabled = false;
+        //    }
 
-        }
+        //}
 
-        private void sprawdzMagnetometry()
-        {
-            if (checkMagnet1X.Checked)
-            {
-                wykres3.Series["Oś X - HMC5883L"].Enabled = true;
-            }
+        //private void sprawdzMagnetometry()
+        //{
+        //    if (checkMagnet1X.Checked)
+        //    {
+        //        wykres3.Series["Oś X - HMC5883L"].Enabled = true;
+        //    }
 
-            if (!checkMagnet1X.Checked)
-            {
-                wykres3.Series["Oś X - HMC5883L"].Enabled = false;
-            }
+        //    if (!checkMagnet1X.Checked)
+        //    {
+        //        wykres3.Series["Oś X - HMC5883L"].Enabled = false;
+        //    }
 
-            if (checkMagnet1Y.Checked)
-            {
-                wykres3.Series["Oś Y - HMC5883L"].Enabled = true;
-            }
+        //    if (checkMagnet1Y.Checked)
+        //    {
+        //        wykres3.Series["Oś Y - HMC5883L"].Enabled = true;
+        //    }
 
-            if (!checkMagnet1Y.Checked)
-            {
-                wykres3.Series["Oś Y - HMC5883L"].Enabled = false;
-            }
+        //    if (!checkMagnet1Y.Checked)
+        //    {
+        //        wykres3.Series["Oś Y - HMC5883L"].Enabled = false;
+        //    }
 
-            if (checkMagnet1Z.Checked)
-            {
-                wykres3.Series["Oś Z - HMC5883L"].Enabled = true;
-            }
+        //    if (checkMagnet1Z.Checked)
+        //    {
+        //        wykres3.Series["Oś Z - HMC5883L"].Enabled = true;
+        //    }
 
-            if (!checkMagnet1Z.Checked)
-            {
-                wykres3.Series["Oś Z - HMC5883L"].Enabled = false;
-            }
-        }
+        //    if (!checkMagnet1Z.Checked)
+        //    {
+        //        wykres3.Series["Oś Z - HMC5883L"].Enabled = false;
+        //    }
+        //}
 
         private void scrollWykres()
         {

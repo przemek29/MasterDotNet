@@ -28,11 +28,9 @@ namespace Autonomiczny_System_Nawigacyjny
         public double dt { get; set; }
        
 
-        public KalmanFilter(double angle, double bias, double pomiar)
+        public KalmanFilter(double angle, double bias, double pomiar, double czestotliwosc)
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
+            
             Q_angle = angle;
             Q_bias = bias;
             R_measure = pomiar;
@@ -45,13 +43,14 @@ namespace Autonomiczny_System_Nawigacyjny
             P[1,0] = 0;
             P[1,1] = 0;
 
-            dt = 0.0117;
+            dt = czestotliwosc;
             
         }
 
-        public double update(double nowaWartosc, double nowyWskaznik)
+        public double update(double kat, double predKatowa, double dt)
         {
-            K_rate = nowaWartosc - K_bias;
+            
+            K_rate = predKatowa - K_bias;
             K_angle += dt * K_rate;
 
             P[0,0] += dt * (P[1,1] + P[0,1]) + Q_angle * dt;
@@ -64,7 +63,7 @@ namespace Autonomiczny_System_Nawigacyjny
             K[0] = P[0,0] / S;
             K[1] = P[1,0] / S;
 
-            y = nowaWartosc - K_angle;
+            y = kat - K_angle;
 
             K_angle += K[0] * y;
             K_bias += K[1] * y;
