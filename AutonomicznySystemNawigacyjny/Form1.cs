@@ -54,8 +54,7 @@ namespace AutonomicznySystemNawigacyjny
         public double[] przyspieszeniaKalibrowane = new double[6];
         public double[] katyCalkowane = new double[6];
 
-        public double[] rollAkcel = new double[2];
-        public double[] pitchAkcel = new double[2];
+        public double[] katyAkcel = new double[4];
 
         public double[] mahony1Q = new double[4];
         public double[] mahony2Q = new double[4];
@@ -71,6 +70,19 @@ namespace AutonomicznySystemNawigacyjny
         public double[] buforGyro2Y = new double[11];
         public double[] buforGyro2Z = new double[11];
 
+        public double rollMah1;
+        public double rollMah2;
+        public double pitchMah1;
+        public double pitchMah2;
+        public double yawMah1;
+        public double yawMah2;
+
+        public double rollMadg1;
+        public double rollMadg2;
+        public double pitchMadg1;
+        public double pitchMadg2;
+        public double yawMadg1;
+        public double yawMadg2;
 
         public double[] surowaPredkosc = new double [6];
 
@@ -78,6 +90,7 @@ namespace AutonomicznySystemNawigacyjny
         public double kursDeklinacja;
 
         public int[] licznikWspolczynnikowGyro = new int[6] { 1,1,1,1,1,1};
+        public int[] licznikWspolczynnikowAkcel = new int[6] { 1, 1, 1, 1, 1, 1 };
         public long licznikWykresu = 0;
         public int licznikRaspberry = 0;
 
@@ -110,25 +123,31 @@ namespace AutonomicznySystemNawigacyjny
         private readonly KalibracjaWspolczynnikow _kalWspolGyro2Y = new KalibracjaWspolczynnikow();
         private readonly KalibracjaWspolczynnikow _kalWspolGyro2Z = new KalibracjaWspolczynnikow();
 
+        private readonly KalibracjaWspolczynnikow _kalWspolAkcel1X = new KalibracjaWspolczynnikow();
+        private readonly KalibracjaWspolczynnikow _kalWspolAkcel1Y = new KalibracjaWspolczynnikow();
+        private readonly KalibracjaWspolczynnikow _kalWspolAkcel1Z = new KalibracjaWspolczynnikow();
+
+        private readonly KalibracjaWspolczynnikow _kalWspolAkcel2X = new KalibracjaWspolczynnikow();
+        private readonly KalibracjaWspolczynnikow _kalWspolAkcel2Y = new KalibracjaWspolczynnikow();
+        private readonly KalibracjaWspolczynnikow _kalWspolAkcel2Z = new KalibracjaWspolczynnikow();
+
         //test
         private readonly MetodaTrapezow _predkoscLiniowa1 = new MetodaTrapezow();
         private readonly MetodaTrapezow _droga1 = new MetodaTrapezow();
 
         //test
 
-
-
         public double[] paczka = new double[9];
 
         MahonyAHRS MahonyFilter = new MahonyAHRS(0.002f); // ZMIENIC ARGUMENT
-        MadgwickAHRS MadgwickFilter = new MadgwickAHRS(0.002f);
-        KalmanFilter kalman1 = new KalmanFilter(0.001, 0.003, 0.03, 100);
-        KalmanFilter kalman2 = new KalmanFilter(0.001, 0.003, 0.03, 100);
-        KalmanFilter kalman3 = new KalmanFilter(0.001, 0.003, 0.03, 100);
-        KalmanFilter kalman4 = new KalmanFilter(0.001, 0.003, 0.03, 100);
+        MadgwickAHRS MadgwickFilter1 = new MadgwickAHRS(0.011);
+        MadgwickAHRS MadgwickFilter2 = new MadgwickAHRS(0.011);
+        KalmanFilter kalman1 = new KalmanFilter(0.1, 0.03, 0.03, 100);
+        KalmanFilter kalman2 = new KalmanFilter(0.1, 0.03, 0.03, 100);
+        KalmanFilter kalman3 = new KalmanFilter(0.1, 0.03, 0.03, 100);
+        KalmanFilter kalman4 = new KalmanFilter(0.1, 0.03, 0.03, 100);
 
         Stopwatch stopWatch = new Stopwatch();
-
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -174,7 +193,6 @@ namespace AutonomicznySystemNawigacyjny
 
         }
 
-
         private void MySerialPortOnDataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs serialDataReceivedEventArgs)
         {
             throw new NotImplementedException();
@@ -203,10 +221,6 @@ namespace AutonomicznySystemNawigacyjny
 
 
         }
-
-
-
-        // utworzenie zdarzenia  parsującego łańcuch odbierany przez rs232
 
         private void rx_parse(object sender, EventArgs e)
         {
@@ -239,7 +253,7 @@ namespace AutonomicznySystemNawigacyjny
             ObliczKursy();
             PrzepiszSuroweKaty();
 
-
+            KontrolujGyro();
             
 
 
@@ -248,16 +262,16 @@ namespace AutonomicznySystemNawigacyjny
             {
 
                 kwaternionyMahony();
+                kwaternionyMadgwick();
 
+                katyMahony();
+                katyMadgwick();
 
-                
+                double kalRoll1 = Math.Round(kalman1.update(katyAkcel[0],gyro1Kalibracja[0],1/czestotliwosc));
+                double kalPitch1 = Math.Round(kalman2.update(katyAkcel[1], gyro1Kalibracja[1], 1 / czestotliwosc));
 
-
-                double kalRoll1 = Math.Round(kalman1.update(rollAkcel[0],gyro1Kalibracja[0],1/czestotliwosc));
-                double kalPitch1 = Math.Round(kalman2.update(pitchAkcel[0], gyro1Kalibracja[1], 1 / czestotliwosc));
-
-                double kalRoll2 = Math.Round(kalman3.update(rollAkcel[1], gyro2Kalibracja[0], 1 / czestotliwosc));
-                double kalPitch2 = Math.Round(kalman4.update(pitchAkcel[1], gyro2Kalibracja[1], 1 / czestotliwosc));
+                double kalRoll2 = Math.Round(kalman3.update(katyAkcel[2], gyro2Kalibracja[0], 1 / czestotliwosc));
+                double kalPitch2 = Math.Round(kalman4.update(katyAkcel[3], gyro2Kalibracja[1], 1 / czestotliwosc));
 
                 t1.Text = Convert.ToString(kalRoll1);
                 t2.Text = Convert.ToString(kalPitch1);
@@ -265,24 +279,25 @@ namespace AutonomicznySystemNawigacyjny
                 t4.Text= Convert.ToString(kalRoll2);
                 t5.Text = Convert.ToString(kalPitch2);
 
-                //var predkosc = _predkoscLiniowa1.calkuj(akcel1Kalibracja, 1 / czestotliwosc);
+                var predkosc = _predkoscLiniowa1.calkuj(akcel1Kalibracja, 1 / czestotliwosc);
 
 
-                ////var droga = _droga1.calkuj(predkosc, 1 / czestotliwosc);
-                //var droga1 = 0.5 * akcel1Kalibracja[0] * Math.Pow((1 / czestotliwosc), 2) + predkosc[0] * (1 / czestotliwosc);
-                //var droga2 = 0.5 * akcel1Kalibracja[1] * Math.Pow((1 / czestotliwosc), 2) + predkosc[1] * (1 / czestotliwosc);
-                ////droga[0] = kalman1.update(droga[0], 0.1, czestotliwosc);
-                ////droga[1] = kalman2.update(droga[1], 0.1, czestotliwosc);
+                //var droga = _droga1.calkuj(predkosc, 1 / czestotliwosc);
+                var droga1 = 0.5 * 9 * Math.Round(akcel1Kalibracja[0]) * (1 / czestotliwosc)*(1 / czestotliwosc) + predkosc[0] * (1 / czestotliwosc);
+                var droga2 = 0.5 * 9 *Math.Round(akcel1Kalibracja[1]) * (1 / czestotliwosc)* (1 / czestotliwosc) + predkosc[1] * (1 / czestotliwosc);
+                //droga[0] = kalman1.update(droga[0], 0.1, czestotliwosc);
+                //droga[1] = kalman2.update(droga[1], 0.1, czestotliwosc);
 
-                //tVxAkcel1.Text = Convert.ToString(predkosc[0]);
-                //tVyAkcel1.Text = Convert.ToString(predkosc[1]);
-
-
-                //tSxAkcel1.Text = Convert.ToString(droga1);
-                //tSyAkcel1.Text = Convert.ToString(droga2);
+                tVxAkcel1.Text = Convert.ToString(predkosc[0]);
+                tVyAkcel1.Text = Convert.ToString(predkosc[1]);
 
 
-                //Wykres.Series["Przemieszczenie"].Points.AddXY(Math.Round(droga1,1), Math.Round(droga2,1));
+                tSxAkcel1.Text = Convert.ToString(droga1);
+                tSyAkcel1.Text = Convert.ToString(droga2);
+
+
+                Wykres.Series["Mahony q0"].Points.AddY(katyAkcel[1]);
+                
 
             }//test
 
@@ -292,13 +307,113 @@ namespace AutonomicznySystemNawigacyjny
             licznikWykresu++;
             
         }
+
+        private double[] EulerToQuaternion(double heading, double attitude, double bank)
+        {
+
+            var C1 = Math.Cos(heading);
+            var C2 = Math.Cos(attitude);
+            var C3 = Math.Cos(bank);
+
+            var S1 = Math.Sin(heading);
+            var S2 = Math.Sin(attitude);
+            var S3 = Math.Sin(bank);
+
+            double[] quaternion = new double[4];
+
+            quaternion[0] = Math.Sqrt(1.0 + C1 * C2 + C1 * C3 - S1 * S2 * S3 + C2 * C3) / 2;
+            quaternion[1] = (C2 * S3 + C1 * S3 + S1 * S2 * C3) / (4.0 * quaternion[0]);
+            quaternion[2] = (S1 * C2 + S1 * C3 + C1 * S2 * S3) / (4.0 * quaternion[0]);
+            quaternion[3] = (-S1 * S3 + C1 * S2 * C3 + S2) / (4.0 * quaternion[0]);
+
+            return quaternion;
+        }
+
+        private void katyMadgwick()
+        {
+            var Z1q0 = madgwick1Q[0];
+            var Z1q1 = madgwick1Q[1];
+            var Z1q2 = madgwick1Q[2];
+            var Z1q3 = madgwick1Q[3];
+
+            var Z2q0 = madgwick2Q[0];
+            var Z2q1 = madgwick2Q[1];
+            var Z2q2 = madgwick2Q[2];
+            var Z2q3 = madgwick2Q[3];
+
+             rollMadg1= Math.Round(Math.Atan2(2 * (Z1q0 * Z1q1 + Z1q2 * Z1q3), (1 - 2 * (Z1q1 * Z1q1 + Z1q2 * Z1q2))) * 180 / Math.PI);
+             rollMadg2= Math.Round(Math.Atan2(2 * (Z2q0 * Z2q1 + Z2q2 * Z2q3), (1 - 2 * (Z2q1 * Z2q1 + Z2q2 * Z2q2))) * 180 / Math.PI);
+
+            tMadgwickObrotX1.Text = Convert.ToString(rollMadg1);
+            tMadgwickObrotX2.Text = Convert.ToString(rollMadg2);
+
+            pitchMadg1 = Math.Round(-Math.Asin(2 * (Z1q0 * Z1q2 - Z1q3 * Z1q1)) * 180.0 / Math.PI);
+            pitchMadg2 = Math.Round(-Math.Asin(2 * (Z2q0 * Z2q2 - Z2q3 * Z2q1)) * 180.0 / Math.PI);
+
+            tMadgwickObrotY1.Text = Convert.ToString(pitchMadg1);
+            tMadgwickObrotY2.Text = Convert.ToString(pitchMadg2);
+
+            yawMadg1 = Math.Round(1.034 * Math.Atan2(2 * (Z1q0 * Z1q3 + Z1q1 * Z1q2), (1 - 2 * (Z1q2 * Z1q2 + Z1q3 * Z1q3))) * 180 / Math.PI);
+            yawMadg2 = Math.Round(1.066 * Math.Atan2(2 * (Z2q0 * Z2q3 + Z2q1 * Z2q2), (1 - 2 * (Z2q2 * Z2q2 + Z2q3 * Z2q3))) * 180 / Math.PI);
+
+            tMadgwickObrotZ1.Text = Convert.ToString(yawMadg1);
+            tMadgwickObrotZ2.Text = Convert.ToString(yawMadg2);
+        }
+
+        private void katyMahony()
+        {
+            var Z1q0 = mahony1Q[0];
+            var Z1q1 = mahony1Q[1];
+            var Z1q2 = mahony1Q[2];
+            var Z1q3 = mahony1Q[3];
+
+            var Z2q0 = mahony2Q[0];
+            var Z2q1 = mahony2Q[1];
+            var Z2q2 = mahony2Q[2];
+            var Z2q3 = mahony2Q[3];
+
+            rollMah1 = Math.Round(Math.Atan2(2 * (Z1q0 * Z1q1 + Z1q2 * Z1q3), (1 - 2 * (Z1q1 * Z1q1 + Z1q2 * Z1q2))) * 180 / Math.PI);
+            rollMah2 = Math.Round(Math.Atan2(2 * (Z2q0 * Z2q1 + Z2q2 * Z2q3), (1 - 2 * (Z2q1 * Z2q1 + Z2q2 * Z2q2))) * 180 / Math.PI);
+
+            tMahonyObrotX1.Text = Convert.ToString(rollMah1);
+            tMahonyObrotX2.Text = Convert.ToString(rollMah2);
+
+            pitchMah1 = Math.Round(-Math.Asin(2 * (Z1q0 * Z1q2 - Z1q3 * Z1q1)) * 180.0 / Math.PI);
+            pitchMah2 = Math.Round(-Math.Asin(2 * (Z2q0 * Z2q2 - Z2q3 * Z2q1)) * 180.0 / Math.PI);
+
+            tMahonyObrotY1.Text = Convert.ToString(pitchMah1);
+            tMahonyObrotY2.Text = Convert.ToString(pitchMah2);
+
+            yawMah1 = Math.Round(1.034 * Math.Atan2(2 * (Z1q0 * Z1q3 + Z1q1 * Z1q2), (1 - 2 * (Z1q2 * Z1q2 + Z1q3 * Z1q3))) * 180 / Math.PI);
+            yawMah2 = Math.Round(1.066 * Math.Atan2(2 * (Z2q0 * Z2q3 + Z2q1 * Z2q2), (1 - 2 * (Z2q2 * Z2q2 + Z2q3 * Z2q3))) * 180 / Math.PI);
+
+            tMahonyObrotZ1.Text = Convert.ToString(yawMah1);
+            tMahonyObrotZ2.Text = Convert.ToString(yawMah2);
+        }
+
+        private void KontrolujGyro()
+        {
+            if (Math.Abs(katyCalkowane[0] - katyAkcel[0]) > 3)
+                _trapezKaty.Calka[0] = katyAkcel[0];
+        }
+
         private void kwaternionyMadgwick()
         {
-            _madgwickZestaw1.MadgwickAHRSupdateIMU(mahony1Q, czestotliwosc, akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2]);
-            _madgwickZestaw2.MadgwickAHRSupdateIMU(mahony2Q, czestotliwosc, akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2], gyro2Kalibracja[0], gyro2Kalibracja[1], gyro2Kalibracja[2]);
 
-            madgwick1Q = _madgwickZestaw1.quaternion;
-            madgwick2Q = _madgwickZestaw2.quaternion;
+
+            //_madgwickZestaw1.MadgwickAHRSupdateIMU(mahony1Q , czestotliwosc, akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2]);
+            //_madgwickZestaw2.MadgwickAHRSupdateIMU(mahony2Q, czestotliwosc, akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2], gyro2Kalibracja[0], gyro2Kalibracja[1], gyro2Kalibracja[2]);
+
+            //_madgwickZestaw1.MadgwickAHRSupdate(mahony1Q, czestotliwosc, akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2],magnet[0], magnet[1],magnet[2]);
+            //_madgwickZestaw2.MadgwickAHRSupdate(mahony2Q, czestotliwosc, akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2], gyro2Kalibracja[0], gyro2Kalibracja[1], gyro2Kalibracja[2], magnet[0], magnet[1], magnet[2]);
+
+            MadgwickFilter1.Update(gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2], akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2]);
+            MadgwickFilter2.Update(gyro2Kalibracja[0], gyro2Kalibracja[1], gyro2Kalibracja[2], akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2]);
+            madgwick1Q = MadgwickFilter1.Quaternion;
+            madgwick2Q = MadgwickFilter2.Quaternion;
+
+            //madgwick1Q = _madgwickZestaw1.quaternion;
+            //madgwick2Q = _madgwickZestaw2.quaternion;
 
             tMadgwick1Q0.Text = Convert.ToString(madgwick1Q[0]);
             tMadgwick1Q1.Text = Convert.ToString(madgwick1Q[1]);
@@ -332,27 +447,28 @@ namespace AutonomicznySystemNawigacyjny
             tMahony1Q2.Text = Convert.ToString(mahony1Q[2]);
             tMahony1Q3.Text = Convert.ToString(mahony1Q[3]);
 
-            tMahony2Q0.Text = Convert.ToString(mahony1Q[0]);
-            tMahony2Q1.Text = Convert.ToString(mahony1Q[1]);
-            tMahony2Q2.Text = Convert.ToString(mahony1Q[2]);
-            tMahony2Q3.Text = Convert.ToString(mahony1Q[3]);
+            tMahony2Q0.Text = Convert.ToString(mahony2Q[0]);
+            tMahony2Q1.Text = Convert.ToString(mahony2Q[1]);
+            tMahony2Q2.Text = Convert.ToString(mahony2Q[2]);
+            tMahony2Q3.Text = Convert.ToString(mahony2Q[3]);
         }
+
         private void PrzepiszSuroweKaty()
         {
-            tSurowyRoll1.Text = Convert.ToString(Math.Round(rollAkcel[0]));
-            tSurowyRoll2.Text = Convert.ToString(Math.Round(rollAkcel[1]));
+            tSurowyRoll1.Text = Convert.ToString(Math.Round(katyAkcel[0]));
+            tSurowyRoll2.Text = Convert.ToString(Math.Round(katyAkcel[2]));
 
-            tSurowyPitch1.Text = Convert.ToString(Math.Round(pitchAkcel[0]));
-            tSurowyPitch2.Text = Convert.ToString(Math.Round(pitchAkcel[1]));
+            tSurowyPitch1.Text = Convert.ToString(Math.Round(katyAkcel[1]));
+            tSurowyPitch2.Text = Convert.ToString(Math.Round(katyAkcel[3]));
         }
 
         private void helperKomplementarny()
         {
-            var roll1 = Math.Round(_komplementarny.oblicz(rollAkcel[0], gyro1Kalibracja[0], akcel1Kalibracja[0], 1 / czestotliwosc));
-            var pitch1 = Math.Round(_komplementarny.oblicz(pitchAkcel[0], gyro1Kalibracja[1], akcel1Kalibracja[1], 1 / czestotliwosc));
+            var roll1 = Math.Round(_komplementarny.oblicz(katyAkcel[0], gyro1Kalibracja[0], akcel1Kalibracja[0], 1 / czestotliwosc));
+            var pitch1 = Math.Round(_komplementarny.oblicz(katyAkcel[1], gyro1Kalibracja[1], akcel1Kalibracja[1], 1 / czestotliwosc));
 
-            var roll2 = Math.Round(_komplementarny.oblicz(rollAkcel[1], gyro2Kalibracja[0], akcel2Kalibracja[0], 1 / czestotliwosc));
-            var pitch2 = Math.Round(_komplementarny.oblicz(pitchAkcel[1], gyro2Kalibracja[1], akcel2Kalibracja[1], 1 / czestotliwosc));
+            var roll2 = Math.Round(_komplementarny.oblicz(katyAkcel[2], gyro2Kalibracja[0], akcel2Kalibracja[0], 1 / czestotliwosc));
+            var pitch2 = Math.Round(_komplementarny.oblicz(katyAkcel[3], gyro2Kalibracja[1], akcel2Kalibracja[1], 1 / czestotliwosc));
 
 
             tRollKomplementarny1.Text = Convert.ToString(roll1);
@@ -374,6 +490,7 @@ namespace AutonomicznySystemNawigacyjny
             }
 
         }
+
         private void ObliczKursy()
         {
             var kurs = _odczytKursu.czytajKurs(magnet[1], magnet[0]);
@@ -441,22 +558,23 @@ namespace AutonomicznySystemNawigacyjny
                 przyspieszeniaKalibrowane[i] = akcel2Kalibracja[i - 3];
             }
 
-            
+
             _katyAkcel1.PrzeliczKaty(akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2]);
             _katyAkcel2.PrzeliczKaty(akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2]);
 
-            rollAkcel[0] = _katyAkcel1.roll;
-            rollAkcel[1] = _katyAkcel2.roll;
-            pitchAkcel[0] = _katyAkcel1.pitch;
-            pitchAkcel[1] = _katyAkcel2.pitch;
+            katyAkcel[0] = Math.Round( GainAkcel1[0] * _katyAkcel1.roll,2);
+            katyAkcel[2] = Math.Round(GainAkcel2[0] * _katyAkcel2.roll);
+            katyAkcel[1] = Math.Round(GainAkcel1[1] * _katyAkcel1.pitch);
+            katyAkcel[3] = Math.Round(GainAkcel2[1] * _katyAkcel2.pitch);
 
-            tRollAkcel1.Text = Convert.ToString(rollAkcel[0]);
-            tRollAkcel2.Text = Convert.ToString(rollAkcel[1]);
+            tRollAkcel1.Text = Convert.ToString(katyAkcel[0]);
+            tRollAkcel2.Text = Convert.ToString(katyAkcel[2]);
 
-            tPitchAkcel1.Text = Convert.ToString(pitchAkcel[0]);
-            tPitchAkcel2.Text = Convert.ToString(pitchAkcel[1]);
+            tPitchAkcel1.Text = Convert.ToString(katyAkcel[1]);
+            tPitchAkcel2.Text = Convert.ToString(katyAkcel[3]);
 
         }
+
         private void kalibracjaZyroskopow()
         {
             gyro1Kalibracja[0] = Math.Round(gyro1[0] * GainGyro1[0] - _kalibracjaBiasGyro1.SredniaX, 4);
@@ -477,18 +595,19 @@ namespace AutonomicznySystemNawigacyjny
 
             
         }
+
         private void kalibracjaAkcelerometrów()
         {
-            akcel1Kalibracja[0] = Math.Round(akcel1[0] * GainAkcel1[0] - _kalibracjaBiasAkcel1.SredniaX, 4);
-            akcel1Kalibracja[1] = Math.Round(akcel1[1] * GainAkcel1[1] - _kalibracjaBiasAkcel1.SredniaY, 4);
+            akcel1Kalibracja[0] = Math.Round(akcel1[0]  - _kalibracjaBiasAkcel1.SredniaX, 4);
+            akcel1Kalibracja[1] = Math.Round(akcel1[1]  - _kalibracjaBiasAkcel1.SredniaY, 4);
             akcel1Kalibracja[2] = Math.Round(akcel1[2] * (1/_kalibracjaBiasAkcel1.SredniaZ), 4);
 
             tAkcel1XKalib.Text = Convert.ToString(akcel1Kalibracja[0]);
             tAkcel1YKalib.Text = Convert.ToString(akcel1Kalibracja[1]);
             tAkcel1ZKalib.Text = Convert.ToString(akcel1Kalibracja[2]);
 
-            akcel2Kalibracja[0] = Math.Round(akcel2[0] * GainAkcel1[0] - _kalibracjaBiasAkcel2.SredniaX, 4);
-            akcel2Kalibracja[1] = Math.Round(akcel2[1] * GainAkcel1[1] - _kalibracjaBiasAkcel2.SredniaY, 4);
+            akcel2Kalibracja[0] = Math.Round(akcel2[0]  - _kalibracjaBiasAkcel2.SredniaX, 4);
+            akcel2Kalibracja[1] = Math.Round(akcel2[1]  - _kalibracjaBiasAkcel2.SredniaY, 4);
             akcel2Kalibracja[2] = Math.Round(akcel2[2] * (1/ _kalibracjaBiasAkcel1.SredniaZ), 4);
 
             tAkcel2XKalib.Text = Convert.ToString(akcel2Kalibracja[0]);
@@ -821,6 +940,7 @@ namespace AutonomicznySystemNawigacyjny
             wykres3.Series["Oś Z - HMC5883L"].Enabled = false;
             //*****************************
         }
+
         private void rysujWykresy()
         {
             //rysuj wykresy z żyroskopów
@@ -884,8 +1004,6 @@ namespace AutonomicznySystemNawigacyjny
             chart1.Series[nazwa].Points.AddY(wartosc);
         }
 
-
-
         private void button4_Click(object sender, EventArgs e)
         {
             this.Hide();
@@ -921,8 +1039,6 @@ namespace AutonomicznySystemNawigacyjny
 
         }
 
-
-
         private void Form1_Load(object sender, EventArgs e)
         {
             if (serialPort1.IsOpen == false)
@@ -957,10 +1073,6 @@ namespace AutonomicznySystemNawigacyjny
             this.Show();
 
         }
-
-
-
-
 
         private void KalibrujMagnetometr()
         {
@@ -1082,7 +1194,7 @@ namespace AutonomicznySystemNawigacyjny
 
         private void bAxisX1_Click(object sender, EventArgs e)
         {
-            _kalWspolGyro1X.kalibruj(gyro1Kalibracja[0], licznikWspolczynnikowGyro[0]);
+            _kalWspolGyro1X.kalibruj(katyCalkowane[0], licznikWspolczynnikowGyro[0]);
 
             bAxisX1.Text = Convert.ToString(licznikWspolczynnikowGyro[0]);
 
@@ -1103,7 +1215,7 @@ namespace AutonomicznySystemNawigacyjny
 
         private void bAxisY1_Click(object sender, EventArgs e)
         {
-            _kalWspolGyro1X.kalibruj(gyro1Kalibracja[1], licznikWspolczynnikowGyro[1]);
+            _kalWspolGyro1Y.kalibruj(katyCalkowane[1], licznikWspolczynnikowGyro[1]);
 
             bAxisY1.Text = Convert.ToString(licznikWspolczynnikowGyro[1]);
 
@@ -1124,7 +1236,7 @@ namespace AutonomicznySystemNawigacyjny
 
         private void bAxisZ1_Click(object sender, EventArgs e)
         {
-            _kalWspolGyro1Z.kalibruj(gyro1Kalibracja[2], licznikWspolczynnikowGyro[2]);
+            _kalWspolGyro1Z.kalibruj(katyCalkowane[2], licznikWspolczynnikowGyro[2]);
 
             bAxisZ1.Text = Convert.ToString(licznikWspolczynnikowGyro[2]);
 
@@ -1145,7 +1257,7 @@ namespace AutonomicznySystemNawigacyjny
 
         private void bAxisX2_Click(object sender, EventArgs e)
         {
-            _kalWspolGyro2X.kalibruj(gyro2Kalibracja[0], licznikWspolczynnikowGyro[3]);
+            _kalWspolGyro2X.kalibruj(katyCalkowane[3], licznikWspolczynnikowGyro[3]);
 
             bAxisX2.Text = Convert.ToString(licznikWspolczynnikowGyro[3]);
 
@@ -1166,7 +1278,7 @@ namespace AutonomicznySystemNawigacyjny
 
         private void button12_Click(object sender, EventArgs e)
         {
-            _kalWspolGyro2Y.kalibruj(gyro2Kalibracja[1], licznikWspolczynnikowGyro[4]);
+            _kalWspolGyro2Y.kalibruj(katyCalkowane[4], licznikWspolczynnikowGyro[4]);
 
             bAxisY2.Text = Convert.ToString(licznikWspolczynnikowGyro[4]);
 
@@ -1188,7 +1300,7 @@ namespace AutonomicznySystemNawigacyjny
 
         private void bAxisZ2_Click(object sender, EventArgs e)
         {
-            _kalWspolGyro2Z.kalibruj(gyro2Kalibracja[2], licznikWspolczynnikowGyro[5]);
+            _kalWspolGyro2Z.kalibruj(katyCalkowane[5], licznikWspolczynnikowGyro[5]);
 
             bAxisZ2.Text = Convert.ToString(licznikWspolczynnikowGyro[5]);
 
@@ -1205,6 +1317,104 @@ namespace AutonomicznySystemNawigacyjny
                 _kalWspolGyro2Z.zeruj();
             }
             licznikWspolczynnikowGyro[5]++;
+        }
+
+        private void button12_Click_1(object sender, EventArgs e)
+        {
+            Wykres.Series.Clear();
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+
+            _trapezKaty.zerujWszystkie();
+           
+
+        }
+
+        private void bWspX1_Click(object sender, EventArgs e)
+        {
+            _kalWspolAkcel1X.kalibruj(katyAkcel[0], licznikWspolczynnikowAkcel[0]);
+
+            bWspX1.Text = Convert.ToString(licznikWspolczynnikowAkcel[0]);
+
+            if (licznikWspolczynnikowAkcel[0] == 10)
+            {
+                if (_kalWspolAkcel1X.Srednia > 0)
+                    GainAkcel1[0] = Math.Round (90 / _kalWspolAkcel1X.Srednia,2);
+
+                if (_kalWspolAkcel1X.Srednia < 0)
+                    GainAkcel1[0] = Math.Round(- 90 / _kalWspolAkcel1X.Srednia,2);
+                
+                tGainAkcel1X.Text = Convert.ToString(GainAkcel1[0]);
+                licznikWspolczynnikowAkcel[0] = 0;
+                _kalWspolAkcel1X.zeruj();
+            }
+            licznikWspolczynnikowAkcel[0]++;
+        }
+
+        private void bWspY1_Click(object sender, EventArgs e)
+        {
+            _kalWspolAkcel1Y.kalibruj(katyAkcel[1], licznikWspolczynnikowAkcel[1]);
+
+            bWspY1.Text = Convert.ToString(licznikWspolczynnikowAkcel[1]);
+
+            if (licznikWspolczynnikowAkcel[1] == 10)
+            {
+                if (_kalWspolAkcel1Y.Srednia > 0)
+                    GainAkcel1[1] = Math.Round(90 / _kalWspolAkcel1Y.Srednia, 2);
+
+                if (_kalWspolAkcel1Y.Srednia < 0)
+                    GainAkcel1[1] = Math.Round(-90 / _kalWspolAkcel1Y.Srednia, 2);
+
+                tGainAkcel1Y.Text = Convert.ToString(GainAkcel1[1]);
+                licznikWspolczynnikowAkcel[1] = 0;
+                _kalWspolAkcel1Y.zeruj();
+            }
+            licznikWspolczynnikowAkcel[1]++;
+
+        }
+
+        private void bWspX2_Click(object sender, EventArgs e)
+        {
+            _kalWspolAkcel2X.kalibruj(katyAkcel[2], licznikWspolczynnikowAkcel[2]);
+
+            bWspX2.Text = Convert.ToString(licznikWspolczynnikowAkcel[2]);
+
+            if (licznikWspolczynnikowAkcel[2] == 10)
+            {
+                if (_kalWspolAkcel2X.Srednia > 0)
+                    GainAkcel2[0] = Math.Round(90 / _kalWspolAkcel2X.Srednia, 2);
+
+                if (_kalWspolAkcel2X.Srednia < 0)
+                    GainAkcel2[0] = Math.Round(-90 / _kalWspolAkcel2X.Srednia, 2);
+
+                tGainAkcel2X.Text = Convert.ToString(GainAkcel2[0]);
+                licznikWspolczynnikowAkcel[2] = 0;
+                _kalWspolAkcel2X.zeruj();
+            }
+            licznikWspolczynnikowAkcel[2]++;
+        }
+
+        private void bWspY2_Click(object sender, EventArgs e)
+        {
+            _kalWspolAkcel2Y.kalibruj(katyAkcel[3], licznikWspolczynnikowAkcel[3]);
+
+            bWspY2.Text = Convert.ToString(licznikWspolczynnikowAkcel[3]);
+
+            if (licznikWspolczynnikowAkcel[3] == 10)
+            {
+                if (_kalWspolAkcel2Y.Srednia > 0)
+                    GainAkcel2[1] = Math.Round(90 / _kalWspolAkcel2Y.Srednia, 2);
+
+                if (_kalWspolAkcel2Y.Srednia < 0)
+                    GainAkcel2[1] = Math.Round(-90 / _kalWspolAkcel2Y.Srednia, 2);
+
+                tGainAkcel2Y.Text = Convert.ToString(GainAkcel2[1]);
+                licznikWspolczynnikowAkcel[3] = 0;
+                _kalWspolAkcel2Y.zeruj();
+            }
+            licznikWspolczynnikowAkcel[3]++;
         }
     }
 }
