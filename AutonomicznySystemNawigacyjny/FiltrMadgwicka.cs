@@ -122,10 +122,10 @@ namespace Autonomiczny_System_Nawigacyjny
             q2 *= recipNorm;
             q3 *= recipNorm;
 
-            quaternion[0] = Math.Round(q0);
-            quaternion[1] = Math.Round(q1);
-            quaternion[2] = Math.Round(q2);
-            quaternion[3] = Math.Round(q3);
+            quaternion[0] = Math.Round(q0,3);
+            quaternion[1] = Math.Round(q1,3);
+            quaternion[2] = Math.Round(q2,3);
+            quaternion[3] = Math.Round(q3,3);
         }
 
 
@@ -208,10 +208,10 @@ namespace Autonomiczny_System_Nawigacyjny
             q2 *= recipNorm;
             q3 *= recipNorm;
 
-            quaternion[0] = Math.Round(q0);
-            quaternion[1] = Math.Round(q1);
-            quaternion[2] = Math.Round(q2);
-            quaternion[3] = Math.Round(q3);
+            quaternion[0] = Math.Round(q0,3);
+            quaternion[1] = Math.Round(q1,3);
+            quaternion[2] = Math.Round(q2,3);
+            quaternion[3] = Math.Round(q3,3);
         }
 
 

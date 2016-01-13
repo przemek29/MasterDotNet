@@ -235,15 +235,12 @@ namespace AutonomicznySystemNawigacyjny
             string[] dane = new string[16];
             dane = rx_str.Split(',');
 
-
-
             konwertujDane(dane);
             wypiszDane();
 
             if (radioButton1.Checked)
-            {
                 KalibrujMagnetometr();
-            }
+            
             kalibracjaZyroskopow();
             kalibracjaMagnetometru();
             kalibracjaAkcelerometrów();
@@ -254,18 +251,20 @@ namespace AutonomicznySystemNawigacyjny
             PrzepiszSuroweKaty();
 
             KontrolujGyro();
-            
-
 
             //test
             if (kalibracjaKoniecAkcel == true)
             {
 
                 kwaternionyMahony();
-                kwaternionyMadgwick();
-
                 katyMahony();
+
+                kwaternionyMadgwick();
                 katyMadgwick();
+
+
+              
+
 
                 double kalRoll1 = Math.Round(kalman1.update(katyAkcel[0],gyro1Kalibracja[0],1/czestotliwosc));
                 double kalPitch1 = Math.Round(kalman2.update(katyAkcel[1], gyro1Kalibracja[1], 1 / czestotliwosc));
@@ -295,9 +294,23 @@ namespace AutonomicznySystemNawigacyjny
                 tSxAkcel1.Text = Convert.ToString(droga1);
                 tSyAkcel1.Text = Convert.ToString(droga2);
 
+                if (licznikRaspberry % 7 == 0)
+                {
+                    Wykres.Series["Czysty kat"].Points.AddY(katyAkcel[1]);
+                    Wykres.Series["Filtr komplementarny"].Points.AddY(Math.Round(_komplementarny.oblicz(katyAkcel[1], gyro1Kalibracja[1], akcel1Kalibracja[1], 1 / czestotliwosc)));
+                    Wykres.Series["Filtr Kalmana"].Points.AddY(kalPitch1);
+                    Wykres.Series["Filtr Mahony"].Points.AddY(pitchMah1);
+                    Wykres.Series["Filtr Madgwicka"].Points.AddY(pitchMadg1);
+                }
+                if (licznikRaspberry % 500 == 0)
+                {
+                    Wykres.Series["Czysty kat"].Points.Clear();
+                    Wykres.Series["Filtr komplementarny"].Points.Clear();
+                    Wykres.Series["Filtr Kalmana"].Points.Clear();
+                    Wykres.Series["Filtr Mahony"].Points.Clear();
+                    Wykres.Series["Filtr Madgwicka"].Points.Clear();
+                }
 
-                Wykres.Series["Mahony q0"].Points.AddY(katyAkcel[1]);
-                
 
             }//test
 
@@ -401,10 +414,10 @@ namespace AutonomicznySystemNawigacyjny
         {
 
 
-            //_madgwickZestaw1.MadgwickAHRSupdateIMU(mahony1Q , czestotliwosc, akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2]);
+            //_madgwickZestaw1.MadgwickAHRSupdateIMU(mahony1Q, czestotliwosc, akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2]);
             //_madgwickZestaw2.MadgwickAHRSupdateIMU(mahony2Q, czestotliwosc, akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2], gyro2Kalibracja[0], gyro2Kalibracja[1], gyro2Kalibracja[2]);
 
-            //_madgwickZestaw1.MadgwickAHRSupdate(mahony1Q, czestotliwosc, akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2],magnet[0], magnet[1],magnet[2]);
+            //_madgwickZestaw1.MadgwickAHRSupdate(mahony1Q, czestotliwosc, akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2], gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2], magnet[0], magnet[1], magnet[2]);
             //_madgwickZestaw2.MadgwickAHRSupdate(mahony2Q, czestotliwosc, akcel2Kalibracja[0], akcel2Kalibracja[1], akcel2Kalibracja[2], gyro2Kalibracja[0], gyro2Kalibracja[1], gyro2Kalibracja[2], magnet[0], magnet[1], magnet[2]);
 
             MadgwickFilter1.Update(gyro1Kalibracja[0], gyro1Kalibracja[1], gyro1Kalibracja[2], akcel1Kalibracja[0], akcel1Kalibracja[1], akcel1Kalibracja[2]);
