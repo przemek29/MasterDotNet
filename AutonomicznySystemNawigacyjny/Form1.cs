@@ -159,7 +159,7 @@ namespace AutonomicznySystemNawigacyjny
                 {
                     button1.Text = "Rozłącz";
                     serialPort1.BaudRate = 115200;
-                    serialPort1.PortName = comboBox1.Text;
+                    serialPort1.PortName = "COM3";//comboBox1.Text;
                     serialPort1.Open();
                     panel1.BackColor = Color.Green;
                     label5.Text = "Połączony";
