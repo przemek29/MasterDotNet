@@ -28,3 +28,13 @@ C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autono
 C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\AutonomicznySystemNawigacyjny.Form1.resources
 C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczny_System_Nawigacyjny.Properties.Resources.resources
 C:\Users\DOMINIKA\Desktop\ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczy System Nawigacyjny.csproj.GenerateResource.Cache
+L:\Dokumenty WAT - nauka\Praca magisterska\Aplikacja - ASN\AutonomicznySystemNawigacyjny\bin\Debug\Autonomiczny System Nawigacyjny.exe.config
+L:\Dokumenty WAT - nauka\Praca magisterska\Aplikacja - ASN\AutonomicznySystemNawigacyjny\bin\Debug\Autonomiczny System Nawigacyjny.exe
+L:\Dokumenty WAT - nauka\Praca magisterska\Aplikacja - ASN\AutonomicznySystemNawigacyjny\bin\Debug\Autonomiczny System Nawigacyjny.pdb
+L:\Dokumenty WAT - nauka\Praca magisterska\Aplikacja - ASN\AutonomicznySystemNawigacyjny\bin\Debug\ZedGraph.dll
+L:\Dokumenty WAT - nauka\Praca magisterska\Aplikacja - ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\AutonomicznySystemNawigacyjny.Form1.resources
+L:\Dokumenty WAT - nauka\Praca magisterska\Aplikacja - ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczny_System_Nawigacyjny.Properties.Resources.resources
+L:\Dokumenty WAT - nauka\Praca magisterska\Aplikacja - ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczy System Nawigacyjny.csproj.GenerateResource.Cache
+L:\Dokumenty WAT - nauka\Praca magisterska\Aplikacja - ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczny System Nawigacyjny.exe
+L:\Dokumenty WAT - nauka\Praca magisterska\Aplikacja - ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczny System Nawigacyjny.pdb
+L:\Dokumenty WAT - nauka\Praca magisterska\Aplikacja - ASN\AutonomicznySystemNawigacyjny\obj\x86\Debug\Autonomiczy System Nawigacyjny.csprojResolveAssemblyReference.cache

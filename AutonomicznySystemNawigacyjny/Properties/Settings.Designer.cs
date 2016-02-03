@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Autonomiczny_System_Nawigacyjny.Properties {
+namespace Sensors.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
