@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Filtering
+namespace Filtracje
 {
     public class Mahony
     {

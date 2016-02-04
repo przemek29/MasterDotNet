@@ -21,7 +21,7 @@ namespace Sensors
 
         public int licznikKalibracji { get; set; }
 
-        private readonly MetodaTrapezow _calkaTrapeza = new MetodaTrapezow();
+        private readonly MetodaTrapezow _calkaTrapeza = new MetodaTrapezow(4);
         private readonly Rad2Deg _helper = new Rad2Deg();
         private readonly KalibracjaWspolczynnikow _kalibrujWspolczynniki = new KalibracjaWspolczynnikow();
 

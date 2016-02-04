@@ -2,10 +2,10 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using Filtering;
+using Filtracje;
 using Sensors;
 using Obliczanie;
-    
+
 
 namespace AutonomicznySystemNawigacyjny
 {
@@ -38,6 +38,17 @@ namespace AutonomicznySystemNawigacyjny
 
         Kurs _kurs = new Kurs();
 
+        OrientacjaKatowa _orientacjaKatowa = new OrientacjaKatowa();
+
+        private readonly PrzyspieszeniaLiniowe _przyspieszeniaLiniowe = new PrzyspieszeniaLiniowe();
+
+        private readonly PredkosciLiniowe _predkosciLiniowe = new PredkosciLiniowe();
+
+        private readonly Droga _droga = new Droga();
+
+        private readonly Komplementarny _komplementarny = new Komplementarny();
+
+        private readonly Kalman _kalman = new Kalman(0.1,0.03,0.03,100);
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -49,7 +60,7 @@ namespace AutonomicznySystemNawigacyjny
                 {
                     button1.Text = "Rozłącz";
                     serialPort1.BaudRate = 115200;
-                    serialPort1.PortName = "COM7";//comboBox1.Text;
+                    serialPort1.PortName = "COM6";//comboBox1.Text;
                     serialPort1.Open();
                     panel1.BackColor = Color.Green;
                     label5.Text = "Połączony";
@@ -72,10 +83,7 @@ namespace AutonomicznySystemNawigacyjny
             }
         }
 
-        private void MySerialPortOnDataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs serialDataReceivedEventArgs)
-        {
-            throw new NotImplementedException();
-        }
+
 
         private void serialPort1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
@@ -117,44 +125,115 @@ namespace AutonomicznySystemNawigacyjny
             string[] dane = new string[16];
             dane = rx_str.Split(',');
 
-            /* KONWERSJA DANYCH*/
-            konwerter.konwertujDane(dane);//ok
-            wypiszDane();//ok
-            /*--------------------------------*/
-                    
+            /************************************************************PIERWSZA STRONA********************************************************/
+            konwersjaDanych(dane);
+
+            odbiorIKalibracjaMagnetometru();
+
+            odbiorIKalibracjaZyroskopu();
+
+            odbiorIKalibracjaAkcelerometru();
+
+            obliczanieKursow();
+
+            // kontrolujKaty();//DO POPRAWY
+
+            /************************************************************DRUGA STRONA********************************************************/
+
+            odbieraneDane();
+
+            filtrKalmana();
+
+           
             
-            /*ODBIÓR I KALIBRACJA MAGNETOMETR*/
-            if (radioButton1.Checked)
+            helperCzestotliwosci();//ok
+        }
+
+        private void filtrKalmana()
+        {
+            if ((ADXL345.koniecKalibracji == true) && (MPU6050_Akcel.koniecKalibracji == true) &&
+                 (L3G4200D.koniecKalibracji == true) && (MPU6050_Giro.koniecKalibracji == true))
             {
-                HMC5883L.dodajPomiar(konwerter.hmc5883l);//ok
-                HMC5883L.kalibruj();//ok
+                _kalman.roll1 = _kalman.update(_orientacjaKatowa.rollADXL345, L3G4200D.omegaKal[0], 1 / czestotliwosc);
+                _kalman.pitch1 = _kalman.update(_orientacjaKatowa.pitchADXL345, L3G4200D.omegaKal[1], 1 / czestotliwosc);
+
+                _kalman.roll2 = _kalman.update(_orientacjaKatowa.rollMPU6050, MPU6050_Giro.omegaKal[0], 1 / czestotliwosc);
+                _kalman.pitch2 = _kalman.update(_orientacjaKatowa.pitchMPU6050, MPU6050_Giro.omegaKal[1], 1 / czestotliwosc);
             }
-            HMC5883L.aktualizacja();//ok
 
-            wypiszKalibracjaMagnetometru();//ok
-            /*---------------------------------*/
-            
-            
-            /*ODBIÓR I KALIBRACJA ŻYROSKOPY*/
-            L3G4200D.dodajPomiar(konwerter.l3g4200d);//ok
-            MPU6050_Giro.dodajPomiar(konwerter.mpu6050_G);//ok
+            wypiszKalmana();
+        }
 
-            kalibrujBiasGyro(1500);//ok
-
-            L3G4200D.aktualizacja();//ok
-            MPU6050_Giro.aktualizacja();//ok
-
-            wypiszGyroPoKalibracji();//ok
-
-            if ((L3G4200D.koniecKalibracji == true) && (MPU6050_Giro.koniecKalibracji == true))
+        private void odbieraneDane()//ok
+        {
+            if ((ADXL345.koniecKalibracji == true) && (MPU6050_Akcel.koniecKalibracji == true) && 
+                (L3G4200D.koniecKalibracji == true) && (MPU6050_Giro.koniecKalibracji==true))
             {
-                L3G4200D.obliczKaty(czestotliwosc);//ok
-                MPU6050_Giro.obliczKaty(czestotliwosc);//ok
-            }
-            wypiszKatyGiro();//ok
-            /*---------------------------*/
-            
+                panel3.BackColor = Color.Green;
 
+                _orientacjaKatowa.oblicz(ADXL345, MPU6050_Akcel);//ok
+
+                _przyspieszeniaLiniowe.oblicz(ADXL345, MPU6050_Akcel);//ok
+
+                _predkosciLiniowe.oblicz(_przyspieszeniaLiniowe.A1, _przyspieszeniaLiniowe.A2, 1 / czestotliwosc);//ok
+
+                _droga.oblicz(_predkosciLiniowe.V1, _predkosciLiniowe.V2, 1 / czestotliwosc);//ok
+
+                _komplementarny.roll1 = _komplementarny.oblicz(ADXL345.euler[0], L3G4200D.omegaKal[0], ADXL345.akcelKal[0], 1 / czestotliwosc);//ok
+                _komplementarny.pitch1 = _komplementarny.oblicz(ADXL345.euler[1], L3G4200D.omegaKal[1], ADXL345.akcelKal[1], 1 / czestotliwosc);//ok
+
+                _komplementarny.roll2 = _komplementarny.oblicz(MPU6050_Akcel.euler[0], MPU6050_Giro.omegaKal[0], MPU6050_Akcel.akcelKal[0], 1 / czestotliwosc);//ok
+                _komplementarny.pitch2 = _komplementarny.oblicz(MPU6050_Akcel.euler[1], MPU6050_Giro.omegaKal[1], MPU6050_Akcel.akcelKal[1], 1 / czestotliwosc);//ok
+            }
+
+            wypiszKatyBezFiltracji();//ok
+            wypiszPrzyspieszeniaLiniowe();//ok
+            wypiszPredkosciLiniowe();//ok
+            wypiszDroga();//ok
+            wypiszKomplementarny();//ok
+        }
+      
+        public void wypiszKalmana()//ok
+        {
+            tKalmanRoll1.Text = Convert.ToString(_kalman.roll1);
+            tKalmanRoll2.Text = Convert.ToString(_kalman.roll2);
+
+            tKalmanPitch1.Text = Convert.ToString(_kalman.pitch1);
+            tKalmanPitch2.Text = Convert.ToString(_kalman.pitch2);
+        }
+
+        private void wypiszKomplementarny()
+        {
+            tRollKomplementarny1.Text = Convert.ToString(_komplementarny.roll1);
+            tRollKomplementarny2.Text = Convert.ToString(_komplementarny.roll2);
+
+            tPitchKomplementarny1.Text = Convert.ToString(_komplementarny.pitch1);
+            tPitchKomplementarny2.Text = Convert.ToString(_komplementarny.pitch2);
+        }
+
+        private void obliczanieKursow()//ok
+        {
+            /*OBLICZANIE KURSÓW*/
+            _kurs.obliczPlaskiKurs(HMC5883L.bKal[0], HMC5883L.bKal[1]);//ok
+            _kurs.obliczDynamicznyKurs(HMC5883L.bKal[0], HMC5883L.bKal[1], HMC5883L.bKal[2], ADXL345.euler[0], ADXL345.euler[1]);//ok
+
+            try //ok
+            {
+                _kurs.uwzglednijDeklinacje(Convert.ToDouble(tDeklinacja.Text));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                tDeklinacja.Text = "0";
+            }
+
+            wypiszKursy();//ok
+
+            /*-----------------*/
+        }
+
+        private void odbiorIKalibracjaAkcelerometru()//ok
+        {
             /*ODBIÓR I KALIBRACJA AKCELEROMETRY*/
             ADXL345.dodajPomiar(konwerter.adxl345);//ok
             MPU6050_Akcel.dodajPomiar(konwerter.mpu6050_A);//ok
@@ -173,40 +252,109 @@ namespace AutonomicznySystemNawigacyjny
             }
             wypiszKatyAccel();//ok
                               /*------------------------------------*/
-
-            /*OBLICZANIE KURSÓW*/
-            _kurs.obliczPlaskiKurs(HMC5883L.bKal[0], HMC5883L.bKal[1]);
-            _kurs.obliczDynamicznyKurs(HMC5883L.bKal[0], HMC5883L.bKal[1], HMC5883L.bKal[2], ADXL345.euler[0], ADXL345.euler[1]);
-
-            try
-            {
-                _kurs.uwzglednijDeklinacje(Convert.ToDouble(tDeklinacja.Text));
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                tDeklinacja.Text = "0";
-            }
-
-            wypiszKursy();
-
-            /*-----------------*/
-
-
-
-            //ObliczKursy();
-            //PrzepiszSuroweKaty();
-
-            //KontrolujGyro();
-
-            //test
-
-
-
-            helperCzestotliwosci();
-            //licznikWykresu++;
-
         }
+
+        private void odbiorIKalibracjaZyroskopu()//ok
+        {
+            /*ODBIÓR I KALIBRACJA ŻYROSKOPY*/
+            L3G4200D.dodajPomiar(konwerter.l3g4200d);//ok
+            MPU6050_Giro.dodajPomiar(konwerter.mpu6050_G);//ok
+
+            kalibrujBiasGyro(1500);//ok
+
+            L3G4200D.aktualizacja();//ok
+            MPU6050_Giro.aktualizacja();//ok
+
+            wypiszGyroPoKalibracji();//ok
+
+            if ((L3G4200D.koniecKalibracji == true) && (MPU6050_Giro.koniecKalibracji == true))
+            {
+                L3G4200D.obliczKaty(czestotliwosc);//ok
+                MPU6050_Giro.obliczKaty(czestotliwosc);//ok
+            }
+            wypiszKatyGiro();//ok
+                             /*---------------------------*/
+        }
+
+        private void odbiorIKalibracjaMagnetometru()//ok
+        {
+            /*ODBIÓR I KALIBRACJA MAGNETOMETR*/
+            if (radioButton1.Checked)
+            {
+                HMC5883L.dodajPomiar(konwerter.hmc5883l);//ok
+                HMC5883L.kalibruj();//ok
+            }
+            HMC5883L.aktualizacja();//ok
+
+            wypiszKalibracjaMagnetometru();//ok
+                                           /*---------------------------------*/
+        }
+
+        private void konwersjaDanych(string[] dane)//ok
+        {
+            /* KONWERSJA DANYCH*/
+            konwerter.konwertujDane(dane);//ok
+            wypiszDane();//ok
+            /*--------------------------------*/
+        }
+
+        private void wypiszDroga()//ok
+        {
+            tSxAkcel1.Text = Convert.ToString(_droga.S1[0]);
+            tSyAkcel1.Text = Convert.ToString(_droga.S1[1]);
+            tSzAkcel1.Text = Convert.ToString(_droga.S1[2]);
+
+            tSxAkcel2.Text = Convert.ToString(_droga.S2[0]);
+            tSyAkcel2.Text = Convert.ToString(_droga.S2[1]);
+            tSzAkcel2.Text = Convert.ToString(_droga.S2[2]);
+        }
+
+        private void wypiszPredkosciLiniowe()//ok
+        {
+            tVxAkcel1.Text = Convert.ToString(_predkosciLiniowe.V1[0]);
+            tVyAkcel1.Text = Convert.ToString(_predkosciLiniowe.V1[1]);
+            tVzAkcel1.Text = Convert.ToString(Math.Round(_predkosciLiniowe.V1[2],4));
+
+            tVxAkcel2.Text = Convert.ToString(_predkosciLiniowe.V2[0]);
+            tVyAkcel2.Text = Convert.ToString(_predkosciLiniowe.V2[1]);
+            tVzAkcel2.Text = Convert.ToString(Math.Round(_predkosciLiniowe.V2[2],4));
+        }
+
+        private void wypiszPrzyspieszeniaLiniowe()
+        {
+            tAxAkcel1.Text = Convert.ToString(_przyspieszeniaLiniowe.A1[0]);
+            tAyAkcel1.Text = Convert.ToString(_przyspieszeniaLiniowe.A1[1]);
+            tAzAkcel1.Text = Convert.ToString(_przyspieszeniaLiniowe.A1[2]);
+
+            tAxAkcel2.Text = Convert.ToString(_przyspieszeniaLiniowe.A2[0]);
+            tAyAkcel2.Text = Convert.ToString(_przyspieszeniaLiniowe.A2[1]);
+            tAzAkcel2.Text = Convert.ToString(_przyspieszeniaLiniowe.A2[2]);
+        }//ok
+
+        private void wypiszKatyBezFiltracji()//ok
+        {
+            tSurowyRoll1.Text = Convert.ToString(_orientacjaKatowa.rollADXL345);
+            tSurowyPitch1.Text = Convert.ToString(_orientacjaKatowa.pitchADXL345);
+
+            tSurowyRoll2.Text = Convert.ToString(_orientacjaKatowa.rollMPU6050);
+            tSurowyPitch2.Text = Convert.ToString(_orientacjaKatowa.pitchMPU6050);
+        }
+
+        private void kontrolujKaty()
+        {
+
+            for (var i = 0;
+                i < 2; i++)
+            {
+                if (Math.Abs(L3G4200D.euler[i] - ADXL345.euler[i]) > 3)
+                    L3G4200D.euler[i] = (L3G4200D.euler[i] + ADXL345.euler[i]) / 2;
+
+                if (Math.Abs(MPU6050_Giro.euler[i] - MPU6050_Akcel.euler[i]) > 3)
+                    MPU6050_Giro.euler[i] = (MPU6050_Giro.euler[i] + MPU6050_Akcel.euler[i]) / 2;
+
+            }
+        }
+
 
         private void kalibrujBiasAkcel(int iloscProbek)//ok
         {
@@ -267,7 +415,7 @@ namespace AutonomicznySystemNawigacyjny
                 wypiszBiasGyro();
             }
         }
-
+        /*
         private double[] EulerToQuaternion(double heading, double attitude, double bank)
         {
 
@@ -287,7 +435,7 @@ namespace AutonomicznySystemNawigacyjny
             quaternion[3] = (-S1 * S3 + C1 * S2 * C3 + S2) / (4.0 * quaternion[0]);
 
             return quaternion;
-        }
+        }*/
 
         /* private void katyMadgwick()
         {
@@ -351,12 +499,6 @@ namespace AutonomicznySystemNawigacyjny
             tMahonyObrotZ2.Text = Convert.ToString(yawMah2);
         }*/
 
-        /* private void KontrolujGyro()
-        {
-            if (Math.Abs(katyCalkowane[0] - katyAkcel[0]) > 3)
-                _trapezKaty.Calka[0] = katyAkcel[0];
-        }*/
-
         /* private void kwaternionyMadgwick()
         {
 
@@ -412,7 +554,7 @@ namespace AutonomicznySystemNawigacyjny
             tMahony2Q2.Text = Convert.ToString(mahony2Q[2]);
             tMahony2Q3.Text = Convert.ToString(mahony2Q[3]);
         }*/
-     
+
         /*private void helperKomplementarny()
         {
             var roll1 = Math.Round(_komplementarny.oblicz(katyAkcel[0], gyro1Kalibracja[0], akcel1Kalibracja[0], 1 / czestotliwosc));
@@ -447,7 +589,6 @@ namespace AutonomicznySystemNawigacyjny
             tKursGeograficzny.Text = Convert.ToString(_kurs.kursDeklinacja);
             tKursFuzja.Text = Convert.ToString(_kurs.kursDynamiczny);
         }
-        
 
         private void wypiszKatyGiro()//ok
         {
@@ -679,7 +820,8 @@ namespace AutonomicznySystemNawigacyjny
         {
             //deklinacja = Convert.ToDouble(tDeklinacja.Text);
         }
-private void button3_Click(object sender, EventArgs e)//ok
+
+        private void button3_Click(object sender, EventArgs e)//ok
         {
             ADXL345.zeruj();
             MPU6050_Akcel.zeruj();
@@ -852,6 +994,16 @@ private void button3_Click(object sender, EventArgs e)//ok
 
             tGainAkcel2X.Text = Convert.ToString(MPU6050_Akcel.licznikWspolczynnikowAkcel[0]);
             tGainAkcel2Y.Text = Convert.ToString(MPU6050_Akcel.licznikWspolczynnikowAkcel[0]);
+        }
+
+        private void bZerujPredkosciLiniowe(object sender, EventArgs e)//ok
+        {
+            _predkosciLiniowe.zeruj();
+        }
+
+        private void button8_Click(object sender, EventArgs e)//ok
+        {
+            _droga.zeruj();
         }
     }
 }

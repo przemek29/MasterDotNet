@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Czujniki\Akcelerometr.cs" />
+    <Compile Include="Obliczanie\Droga.cs" />
     <Compile Include="Filtracje\Komplementarny.cs" />
     <Compile Include="GlowneOkno.cs">
       <SubType>Form</SubType>
@@ -84,6 +85,7 @@
       <DependentUpon>GlowneOkno.cs</DependentUpon>
     </Compile>
     <Compile Include="Czujniki\Giroskop.cs" />
+    <Compile Include="Helper\DzielenieWektorów.cs" />
     <Compile Include="Helper\Rad2Deg.cs" />
     <Compile Include="Kalibracje\KalibracjaBias.cs" />
     <Compile Include="Kalibracje\KalibracjaMagnetometru.cs" />
@@ -96,6 +98,9 @@
     <Compile Include="Calkowanie\MetodaSimpsona.cs" />
     <Compile Include="Calkowanie\MetodaTrapezow.cs" />
     <Compile Include="Obliczanie\Kurs.cs" />
+    <Compile Include="Obliczanie\OrientacjaKatowa.cs" />
+    <Compile Include="Obliczanie\PredkosciLiniowe.cs" />
+    <Compile Include="Obliczanie\PrzyspieszeniaLiniowe.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Obliczanie\Trygonometria.cs" />
