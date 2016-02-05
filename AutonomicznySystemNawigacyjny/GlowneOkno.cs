@@ -6,17 +6,19 @@ using Filtracje;
 using Sensors;
 using Obliczanie;
 
-
 namespace AutonomicznySystemNawigacyjny
 {
-    public partial class Form1 : Form
+    public partial class AHRS : Form
     {
-        public Form1()
+        public AHRS()
         {
             InitializeComponent();
+
         }
 
         public long millisecondTime { get; set; }
+        public string[] dane { get; private set; }
+
         public int rzad = 10;
         public int n;
         public double czestotliwosc = 90;
@@ -30,6 +32,9 @@ namespace AutonomicznySystemNawigacyjny
 
         Giroskop L3G4200D = new Giroskop();
         Giroskop MPU6050_Giro = new Giroskop();
+
+        //Giroskop1 L3G4200D = new Giroskop1();
+        //Giroskop1 MPU6050_Giro = new Giroskop1();
 
         Akcelerometr ADXL345 = new Akcelerometr();
         Akcelerometr MPU6050_Akcel = new Akcelerometr();
@@ -48,7 +53,7 @@ namespace AutonomicznySystemNawigacyjny
 
         private readonly Komplementarny _komplementarny = new Komplementarny();
 
-        private readonly Kalman _kalman = new Kalman(0.1,0.03,0.03,100);
+        private readonly Kalman _kalman = new Kalman(0.1, 0.03, 0.03, 100);
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -60,7 +65,7 @@ namespace AutonomicznySystemNawigacyjny
                 {
                     button1.Text = "Rozłącz";
                     serialPort1.BaudRate = 115200;
-                    serialPort1.PortName = "COM6";//comboBox1.Text;
+                    serialPort1.PortName = "COM8";//comboBox1.Text;
                     serialPort1.Open();
                     panel1.BackColor = Color.Green;
                     label5.Text = "Połączony";
@@ -75,6 +80,7 @@ namespace AutonomicznySystemNawigacyjny
             else
             {
                 button1.Text = "Połącz";
+
                 serialPort1.Close();
                 panel1.BackColor = Color.Red;
                 label5.Text = "Rozłączony";
@@ -93,9 +99,6 @@ namespace AutonomicznySystemNawigacyjny
             {
                 rx_str = serialPort1.ReadTo("\r\n");
                 rx_str = " ";
-
-
-
             }
             else
             {
@@ -106,13 +109,10 @@ namespace AutonomicznySystemNawigacyjny
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
-
-
                 }
 
                 this.Invoke(new EventHandler(rx_parse)); // instalacja zdarzenia parsującego odebrany łańcuch
             }
-
         }
 
         private void rx_parse(object sender, EventArgs e)
@@ -122,7 +122,7 @@ namespace AutonomicznySystemNawigacyjny
                 stopWatch.Restart();
             }
 
-            string[] dane = new string[16];
+
             dane = rx_str.Split(',');
 
             /************************************************************PIERWSZA STRONA********************************************************/
@@ -144,8 +144,8 @@ namespace AutonomicznySystemNawigacyjny
 
             filtrKalmana();
 
-           
-            
+
+
             helperCzestotliwosci();//ok
         }
 
@@ -166,8 +166,8 @@ namespace AutonomicznySystemNawigacyjny
 
         private void odbieraneDane()//ok
         {
-            if ((ADXL345.koniecKalibracji == true) && (MPU6050_Akcel.koniecKalibracji == true) && 
-                (L3G4200D.koniecKalibracji == true) && (MPU6050_Giro.koniecKalibracji==true))
+            if ((ADXL345.koniecKalibracji == true) && (MPU6050_Akcel.koniecKalibracji == true) &&
+                (L3G4200D.koniecKalibracji == true) && (MPU6050_Giro.koniecKalibracji == true))
             {
                 panel3.BackColor = Color.Green;
 
@@ -192,7 +192,7 @@ namespace AutonomicznySystemNawigacyjny
             wypiszDroga();//ok
             wypiszKomplementarny();//ok
         }
-      
+
         public void wypiszKalmana()//ok
         {
             tKalmanRoll1.Text = Convert.ToString(_kalman.roll1);
@@ -313,11 +313,11 @@ namespace AutonomicznySystemNawigacyjny
         {
             tVxAkcel1.Text = Convert.ToString(_predkosciLiniowe.V1[0]);
             tVyAkcel1.Text = Convert.ToString(_predkosciLiniowe.V1[1]);
-            tVzAkcel1.Text = Convert.ToString(Math.Round(_predkosciLiniowe.V1[2],4));
+            tVzAkcel1.Text = Convert.ToString(Math.Round(_predkosciLiniowe.V1[2], 4));
 
             tVxAkcel2.Text = Convert.ToString(_predkosciLiniowe.V2[0]);
             tVyAkcel2.Text = Convert.ToString(_predkosciLiniowe.V2[1]);
-            tVzAkcel2.Text = Convert.ToString(Math.Round(_predkosciLiniowe.V2[2],4));
+            tVzAkcel2.Text = Convert.ToString(Math.Round(_predkosciLiniowe.V2[2], 4));
         }
 
         private void wypiszPrzyspieszeniaLiniowe()
@@ -1005,5 +1005,6 @@ namespace AutonomicznySystemNawigacyjny
         {
             _droga.zeruj();
         }
+
     }
 }

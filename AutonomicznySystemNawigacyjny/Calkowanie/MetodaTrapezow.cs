@@ -29,10 +29,6 @@ namespace Calkowanie
             return Calka;
         }
 
-        public void zeruj(int parametr)
-        {
-            Calka[parametr] = 0;
-        }
         public void zerujWszystkie()
         {
             for (var i = 0; i < 3; i++)

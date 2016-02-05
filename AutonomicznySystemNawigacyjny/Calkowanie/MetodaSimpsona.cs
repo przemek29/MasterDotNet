@@ -1,26 +1,57 @@
-﻿
+﻿using System;
+
 namespace Calkowanie
 {
-    class MetodaSimpsona
+    public class MetodaSimpsona
     {
-        public double calculate(double xp, double xk, int n, double[] paczka)
+        private double[] Fa { get; set; } = { 0, 0, 0 };
+        private double[] Fb { get; set; } = { 0, 0, 0 };
+        private double[] Fab { get; set; } = { 0, 0, 0 };
+
+        private double[] wynik { get; set; } = { 0, 0, 0 };
+
+        public double[] Calka { get; set; } = { 0, 0, 0 };
+
+        private int licznik { get; set; } = 1;
+        private int Precyzja { get; set; }
+
+        public MetodaSimpsona(int precyzja)
         {
-            double dx, calka, s, x;
+            this.Precyzja = precyzja;
+        }
 
-            dx = (xk - xp) / (double)n;
-
-            calka = 0;
-            s = 0;
-            for (int i = 1; i < n; i++)
+        public double[] oblicz(double[] wartosc)
+        {
+            if (licznik == 1)
+                Fa = wartosc;
+            if (licznik == 5)
+                Fab = wartosc;
+            if (licznik == 9)
             {
-                x = xp + i * dx;
-                s += paczka[(int)(x - dx / 2)];
-                calka += paczka[(int)x];
+                Fb = wartosc;
+                simpson();
+                licznik = 0;
             }
-            s += paczka[(int)(xk - dx / 2)];
-            calka = (dx / 6) * (paczka[0] + paczka[paczka.Length - 1] + 2 * calka + 4 * s);
+            licznik++;
+            return Calka;
+        }
 
-            return calka;
+        private void simpson()
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                wynik[i] = (8/54) * (Fa[i] + 4 * Fab[i] + 4 * Fb[i]);
+                Calka[i] += Math.Round(wynik[i],Precyzja);
+            }
+        }
+
+        internal void zerujWszystkie()
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                Calka[i] = 0;
+            }
         }
     }
 }
+
